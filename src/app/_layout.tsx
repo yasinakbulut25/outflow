@@ -4,6 +4,8 @@ import { View, ActivityIndicator } from 'react-native';
 import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
+import { BottomSheetModalProvider } from '@gorhom/bottom-sheet';
 import { Provider } from 'react-redux';
 
 import { store } from '@/store';
@@ -38,11 +40,15 @@ function RootNavigator() {
 
 export default function RootLayout() {
   return (
-    <Provider store={store}>
-      <SafeAreaProvider>
-        <StatusBar style="dark" />
-        <RootNavigator />
-      </SafeAreaProvider>
-    </Provider>
+    <GestureHandlerRootView style={{ flex: 1 }}>
+      <Provider store={store}>
+        <SafeAreaProvider>
+          <BottomSheetModalProvider>
+            <StatusBar style="dark" />
+            <RootNavigator />
+          </BottomSheetModalProvider>
+        </SafeAreaProvider>
+      </Provider>
+    </GestureHandlerRootView>
   );
 }
