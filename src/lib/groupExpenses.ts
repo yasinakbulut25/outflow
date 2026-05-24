@@ -25,7 +25,7 @@ function displayDate(e: Expense): string {
 }
 
 /** Bu listede gösterilecek tutar (taksit ayında aylık taksit, aksi halde toplam). */
-function displayAmount(e: Expense): number {
+export function displayAmount(e: Expense): number {
   if (e.installment_display_month && e.installment_count) {
     return Math.round((e.total_amount / e.installment_count) * 100) / 100;
   }
