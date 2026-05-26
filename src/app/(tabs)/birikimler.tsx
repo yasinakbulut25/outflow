@@ -8,9 +8,9 @@ import { Icon } from '@/components/ui/Icon';
 import { EmptyState } from '@/components/ui/EmptyState';
 import { ErrorState } from '@/components/ui/ErrorState';
 import { SkeletonCard } from '@/components/ui/SkeletonCard';
-import { ExpenseCard } from '@/components/expenses/ExpenseCard';
 import { PeriodBar } from '@/components/expenses/PeriodBar';
-import { ExpenseFormSheet, type ExpenseFormSheetRef } from '@/components/expenses/ExpenseFormSheet';
+import { SavingsCard } from '@/components/savings/SavingsCard';
+import { SavingsFormSheet, type SavingsFormSheetRef } from '@/components/savings/SavingsFormSheet';
 import { useGetExpensesQuery } from '@/store/api';
 import { usePeriod } from '@/hooks/usePeriod';
 import { displayAmount } from '@/lib/groupExpenses';
@@ -20,7 +20,7 @@ import { haptics } from '@/lib/haptics';
 import { colors } from '@/theme/tokens';
 
 export default function SavingsScreen() {
-  const sheetRef = useRef<ExpenseFormSheetRef>(null);
+  const sheetRef = useRef<SavingsFormSheetRef>(null);
   const { year, month } = usePeriod();
   const { data, isLoading, isError, isFetching, refetch } = useGetExpensesQuery(
     { year, month: month ?? undefined },
@@ -62,7 +62,7 @@ export default function SavingsScreen() {
           data={savings}
           keyExtractor={(e) => String(e.id)}
           renderItem={({ item }) => (
-            <ExpenseCard expense={item} onPress={(e) => sheetRef.current?.present(e)} />
+            <SavingsCard saving={item} onPress={(e) => sheetRef.current?.present(e)} />
           )}
           contentContainerStyle={{ paddingHorizontal: 16, paddingTop: 16, paddingBottom: 24 }}
           ListHeaderComponent={header}
@@ -97,11 +97,7 @@ export default function SavingsScreen() {
         <Icon icon={Plus} size={26} color={colors.white} />
       </Pressable>
 
-      <ExpenseFormSheet
-        ref={sheetRef}
-        forcedCategoryId={BIRIKIM_CATEGORY_ID}
-        labels={{ create: 'Yeni birikim', edit: 'Birikimi düzenle' }}
-      />
+      <SavingsFormSheet ref={sheetRef} />
     </SafeAreaView>
   );
 }
