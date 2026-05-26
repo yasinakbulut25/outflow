@@ -3,11 +3,11 @@ import { View, Pressable } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { FlashList } from '@shopify/flash-list';
 import { Plus, Repeat } from 'lucide-react-native';
-import { Text } from '@/components/ui/Text';
 import { Icon } from '@/components/ui/Icon';
 import { EmptyState } from '@/components/ui/EmptyState';
 import { ErrorState } from '@/components/ui/ErrorState';
 import { SkeletonCard } from '@/components/ui/SkeletonCard';
+import { ScreenHeader } from '@/components/ui/ScreenHeader';
 import { RecurringCard } from '@/components/recurring/RecurringCard';
 import { RecurringFormSheet, type RecurringFormSheetRef } from '@/components/recurring/RecurringFormSheet';
 import { useGetRecurringQuery } from '@/store/api';
@@ -34,7 +34,9 @@ export default function RecurringScreen() {
             <RecurringCard template={item} onPress={(t) => sheetRef.current?.present(t)} />
           )}
           contentContainerStyle={{ paddingHorizontal: 16, paddingTop: 16, paddingBottom: 24 }}
-          ListHeaderComponent={<Text variant="h1" className="mb-3">Düzenli ödemeler</Text>}
+          ListHeaderComponent={
+            <ScreenHeader title="Düzenli Ödemeler" description="Her ay otomatik oluşturulan sabit giderlerin." />
+          }
           ListEmptyComponent={
             isError && !(data ?? []).length ? (
               <ErrorState onRetry={refetch} />

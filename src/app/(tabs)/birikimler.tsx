@@ -1,23 +1,27 @@
-import { useMemo, useRef } from 'react';
-import { View, Pressable } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
-import { FlashList } from '@shopify/flash-list';
-import { Plus, HandCoins } from 'lucide-react-native';
-import { Text } from '@/components/ui/Text';
-import { Icon } from '@/components/ui/Icon';
-import { EmptyState } from '@/components/ui/EmptyState';
-import { ErrorState } from '@/components/ui/ErrorState';
-import { SkeletonCard } from '@/components/ui/SkeletonCard';
-import { PeriodBar } from '@/components/expenses/PeriodBar';
-import { SavingsCard } from '@/components/savings/SavingsCard';
-import { SavingsFormSheet, type SavingsFormSheetRef } from '@/components/savings/SavingsFormSheet';
-import { useGetExpensesQuery } from '@/store/api';
-import { usePeriod } from '@/hooks/usePeriod';
-import { displayAmount } from '@/lib/groupExpenses';
-import { formatCurrency } from '@/lib/formatters';
-import { BIRIKIM_CATEGORY_ID } from '@/lib/categoryIcons';
-import { haptics } from '@/lib/haptics';
-import { colors } from '@/theme/tokens';
+import { PeriodBar } from "@/components/expenses/PeriodBar";
+import { SavingsCard } from "@/components/savings/SavingsCard";
+import {
+  SavingsFormSheet,
+  type SavingsFormSheetRef,
+} from "@/components/savings/SavingsFormSheet";
+import { EmptyState } from "@/components/ui/EmptyState";
+import { ErrorState } from "@/components/ui/ErrorState";
+import { Icon } from "@/components/ui/Icon";
+import { ScreenHeader } from "@/components/ui/ScreenHeader";
+import { SkeletonCard } from "@/components/ui/SkeletonCard";
+import { Text } from "@/components/ui/Text";
+import { usePeriod } from "@/hooks/usePeriod";
+import { BIRIKIM_CATEGORY_ID } from "@/lib/categoryIcons";
+import { formatCurrency } from "@/lib/formatters";
+import { displayAmount } from "@/lib/groupExpenses";
+import { haptics } from "@/lib/haptics";
+import { useGetExpensesQuery } from "@/store/api";
+import { colors } from "@/theme/tokens";
+import { FlashList } from "@shopify/flash-list";
+import { HandCoins, Plus } from "lucide-react-native";
+import { useMemo, useRef } from "react";
+import { Pressable, View } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function SavingsScreen() {
   const sheetRef = useRef<SavingsFormSheetRef>(null);
@@ -34,23 +38,40 @@ export default function SavingsScreen() {
         .sort((a, b) => b.expense_date.localeCompare(a.expense_date)),
     [data],
   );
-  const total = useMemo(() => savings.reduce((sum, e) => sum + displayAmount(e), 0), [savings]);
+  const total = useMemo(
+    () => savings.reduce((sum, e) => sum + displayAmount(e), 0),
+    [savings],
+  );
 
   const header = (
     <View>
+      <ScreenHeader
+        title="Birikimler"
+        description="Altın, döviz, nakit; neyi ne kadar biriktirdiğini takip et."
+      />
       <View className="mb-4 rounded-2xl bg-emerald p-4">
-        <Text className="text-sm font-medium text-white/80">Toplam birikim</Text>
-        <Text className="mt-1 text-3xl font-bold text-white" style={{ fontVariant: ['tabular-nums'] }}>
+        <Text className="text-sm font-medium text-white/80">
+          Toplam birikim
+        </Text>
+        <Text
+          className="mt-1 text-3xl font-bold text-white"
+          style={{ fontVariant: ["tabular-nums"] }}
+        >
           {formatCurrency(total)} ₺
         </Text>
-        <Text className="mt-1 text-sm text-white/80">{savings.length} kayıt</Text>
+        <Text className="mt-1 text-sm text-white/80">
+          {savings.length} kayıt
+        </Text>
       </View>
       <PeriodBar />
     </View>
   );
 
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: colors.background }} edges={['top']}>
+    <SafeAreaView
+      style={{ flex: 1, backgroundColor: colors.background }}
+      edges={["top"]}
+    >
       {isLoading ? (
         <View className="flex-1 px-4 pt-4">
           {Array.from({ length: 4 }, (_, i) => (
@@ -62,9 +83,16 @@ export default function SavingsScreen() {
           data={savings}
           keyExtractor={(e) => String(e.id)}
           renderItem={({ item }) => (
-            <SavingsCard saving={item} onPress={(e) => sheetRef.current?.present(e)} />
+            <SavingsCard
+              saving={item}
+              onPress={(e) => sheetRef.current?.present(e)}
+            />
           )}
-          contentContainerStyle={{ paddingHorizontal: 16, paddingTop: 16, paddingBottom: 24 }}
+          contentContainerStyle={{
+            paddingHorizontal: 16,
+            paddingTop: 16,
+            paddingBottom: 24,
+          }}
           ListHeaderComponent={header}
           ListEmptyComponent={
             isError && !savings.length ? (
@@ -87,7 +115,7 @@ export default function SavingsScreen() {
         accessibilityLabel="Yeni birikim ekle"
         className="absolute bottom-6 right-5 h-14 w-14 items-center justify-center rounded-full bg-emerald active:opacity-80"
         style={{
-          shadowColor: '#000',
+          shadowColor: "#000",
           shadowOffset: { width: 0, height: 2 },
           shadowOpacity: 0.2,
           shadowRadius: 6,
