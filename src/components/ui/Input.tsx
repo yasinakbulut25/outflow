@@ -7,15 +7,18 @@ interface InputProps extends TextInputProps {
   invalid?: boolean;
 }
 
-export function Input({ className, invalid, ...rest }: InputProps) {
+export function Input({ className, invalid, style, ...rest }: InputProps) {
   return (
     <TextInput
       placeholderTextColor={colors.muted}
+      textAlignVertical="center"
       className={cn(
         'rounded-xl border bg-white px-3 py-3 text-base text-foreground',
         invalid ? 'border-danger' : 'border-border',
         className,
       )}
+      // includeFontPadding: Android'de metnin üstte boşluk bırakmasını önler (dikey ortalama).
+      style={[{ includeFontPadding: false }, style]}
       {...rest}
     />
   );

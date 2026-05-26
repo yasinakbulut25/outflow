@@ -40,12 +40,13 @@ export function CurrencyInput({ value, onChangeValue, invalid, className }: Curr
       keyboardType="number-pad"
       placeholder="0"
       placeholderTextColor={colors.muted}
+      textAlignVertical="center"
       className={cn(
         'rounded-xl border bg-white px-3 py-3 text-right text-base font-semibold text-foreground',
         invalid ? 'border-danger' : 'border-border',
         className,
       )}
-      style={{ fontVariant: ['tabular-nums'] }}
+      style={{ fontVariant: ['tabular-nums'], includeFontPadding: false }}
     />
   );
 }
