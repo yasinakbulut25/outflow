@@ -1,10 +1,7 @@
 import { useEffect, useRef } from 'react';
 import { View, Pressable, ScrollView, type LayoutChangeEvent } from 'react-native';
-import { ChevronLeft, ChevronRight } from 'lucide-react-native';
 import { Text } from '@/components/ui/Text';
-import { Icon } from '@/components/ui/Icon';
 import { cn } from '@/lib/cn';
-import { colors } from '@/theme/tokens';
 import { getMonthName } from '@/lib/formatters';
 import { haptics } from '@/lib/haptics';
 import { usePeriod } from '@/hooks/usePeriod';
@@ -21,7 +18,7 @@ function centerX(x: number, width: number, containerWidth: number): number {
 }
 
 export function PeriodBar() {
-  const { year, month, setMonth, prevYear, nextYear } = usePeriod();
+  const { month, setMonth } = usePeriod();
 
   const scrollRef = useRef<ScrollView>(null);
   const layouts = useRef<Record<string, { x: number; width: number }>>({});
@@ -40,29 +37,7 @@ export function PeriodBar() {
   }, [selectedKey]);
 
   return (
-    <View className="gap-3 pb-3">
-      <View className="flex-row items-center justify-between">
-        <Pressable
-          onPress={prevYear}
-          hitSlop={8}
-          accessibilityRole="button"
-          accessibilityLabel="Önceki yıl"
-          className="p-1 active:opacity-60"
-        >
-          <Icon icon={ChevronLeft} size={22} color={colors.foreground} />
-        </Pressable>
-        <Text variant="h2">{year}</Text>
-        <Pressable
-          onPress={nextYear}
-          hitSlop={8}
-          accessibilityRole="button"
-          accessibilityLabel="Sonraki yıl"
-          className="p-1 active:opacity-60"
-        >
-          <Icon icon={ChevronRight} size={22} color={colors.foreground} />
-        </Pressable>
-      </View>
-
+    <View className="pb-3">
       <ScrollView
         ref={scrollRef}
         horizontal

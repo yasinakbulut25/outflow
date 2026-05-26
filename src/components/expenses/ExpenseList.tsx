@@ -5,6 +5,8 @@ import { Wallet } from 'lucide-react-native';
 import { EmptyState } from '@/components/ui/EmptyState';
 import { ErrorState } from '@/components/ui/ErrorState';
 import { SkeletonCard } from '@/components/ui/SkeletonCard';
+import { ScreenHeader } from '@/components/ui/ScreenHeader';
+import { YearStepper } from '@/components/ui/YearStepper';
 import { useGetExpensesQuery, useGetRecurringQuery } from '@/store/api';
 import { usePeriod } from '@/hooks/usePeriod';
 import { groupExpensesByMonthAndDay } from '@/lib/groupExpenses';
@@ -56,10 +58,21 @@ export function ExpenseList({
     [onPressExpense, onPressSaving, expandKey],
   );
 
+  const listHeader = (
+    <>
+      <ScreenHeader
+        title="Harcamalar"
+        description="Aylık giderlerini, taksitleri ve düzenli ödemelerini takip et."
+        right={<YearStepper />}
+      />
+      <PeriodBar />
+    </>
+  );
+
   if (isLoading) {
     return (
-      <View className="flex-1 px-4">
-        <PeriodBar />
+      <View className="flex-1 px-4 pt-4">
+        {listHeader}
         {Array.from({ length: 4 }, (_, i) => (
           <SkeletonCard key={i} />
         ))}
@@ -72,8 +85,8 @@ export function ExpenseList({
       data={groups}
       keyExtractor={(g) => g.monthKey}
       renderItem={renderItem}
-      contentContainerStyle={{ paddingHorizontal: 16, paddingBottom: 24 }}
-      ListHeaderComponent={<PeriodBar />}
+      contentContainerStyle={{ paddingHorizontal: 16, paddingTop: 16, paddingBottom: 24 }}
+      ListHeaderComponent={listHeader}
       ListEmptyComponent={
         isError && !groups.length ? (
           <ErrorState onRetry={refetch} />

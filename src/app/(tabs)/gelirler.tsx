@@ -7,6 +7,7 @@ import { Icon } from '@/components/ui/Icon';
 import { SkeletonCard } from '@/components/ui/SkeletonCard';
 import { ErrorState } from '@/components/ui/ErrorState';
 import { ScreenHeader } from '@/components/ui/ScreenHeader';
+import { YearStepper } from '@/components/ui/YearStepper';
 import { PeriodBar } from '@/components/expenses/PeriodBar';
 import { IncomeCard } from '@/components/income/IncomeCard';
 import { RecurringIncomeCard } from '@/components/income/RecurringIncomeCard';
@@ -66,7 +67,7 @@ export default function IncomeScreen() {
   return (
     <>
       <Screen scroll refreshing={incomes.isFetching || templates.isFetching} onRefresh={onRefresh}>
-        <ScreenHeader title="Gelirler" description="Tekrarlayan ve tek seferlik gelirlerini yönet." />
+        <ScreenHeader title="Gelirler" description="Tekrarlayan ve tek seferlik gelirlerini yönet." right={<YearStepper />} />
         <View className="mb-4 rounded-2xl p-4" style={{ backgroundColor: TEAL }}>
           <Text className="text-sm font-medium text-white/80">Toplam gelir</Text>
           <Text className="mt-1 text-3xl font-bold text-white" style={{ fontVariant: ['tabular-nums'] }}>

@@ -1,11 +1,12 @@
 import type { ReactNode } from 'react';
-import { View, Pressable } from 'react-native';
-import { ChevronLeft, ChevronRight, BarChart3, PieChart, Scale } from 'lucide-react-native';
+import { View } from 'react-native';
+import { BarChart3, PieChart, Scale } from 'lucide-react-native';
 import { Screen } from '@/components/ui/Screen';
 import { Text } from '@/components/ui/Text';
 import { Icon, type IconComponent } from '@/components/ui/Icon';
 import { Card } from '@/components/ui/Card';
 import { ScreenHeader } from '@/components/ui/ScreenHeader';
+import { YearStepper } from '@/components/ui/YearStepper';
 import { EmptyState } from '@/components/ui/EmptyState';
 import { ErrorState } from '@/components/ui/ErrorState';
 import { SkeletonCard } from '@/components/ui/SkeletonCard';
@@ -29,22 +30,8 @@ function Section({ title, icon, children }: { title: string; icon: IconComponent
   );
 }
 
-function YearStepper({ year, onPrev, onNext }: { year: number; onPrev: () => void; onNext: () => void }) {
-  return (
-    <View className="flex-row items-center gap-1 rounded-full border border-border bg-white p-1">
-      <Pressable onPress={onPrev} hitSlop={6} accessibilityRole="button" accessibilityLabel="Önceki yıl" className="p-1 active:opacity-60">
-        <Icon icon={ChevronLeft} size={18} color={colors.foreground} />
-      </Pressable>
-      <Text variant="h2" className="px-1 text-base">{year}</Text>
-      <Pressable onPress={onNext} hitSlop={6} accessibilityRole="button" accessibilityLabel="Sonraki yıl" className="p-1 active:opacity-60">
-        <Icon icon={ChevronRight} size={18} color={colors.foreground} />
-      </Pressable>
-    </View>
-  );
-}
-
 export default function AnalyticsScreen() {
-  const { year, prevYear, nextYear } = usePeriod();
+  const { year } = usePeriod();
   const { data, isLoading, isError, isFetching, refetch } = useGetAnalyticsQuery(year, {
     refetchOnMountOrArgChange: true,
   });
@@ -60,7 +47,7 @@ export default function AnalyticsScreen() {
       <ScreenHeader
         title="Analiz"
         description="Yıllık gelir, gider ve kategori dağılımının özeti."
-        right={<YearStepper year={year} onPrev={prevYear} onNext={nextYear} />}
+        right={<YearStepper />}
       />
 
       {isLoading ? (

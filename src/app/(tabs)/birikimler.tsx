@@ -8,6 +8,7 @@ import { EmptyState } from "@/components/ui/EmptyState";
 import { ErrorState } from "@/components/ui/ErrorState";
 import { Icon } from "@/components/ui/Icon";
 import { ScreenHeader } from "@/components/ui/ScreenHeader";
+import { YearStepper } from "@/components/ui/YearStepper";
 import { SkeletonCard } from "@/components/ui/SkeletonCard";
 import { Text } from "@/components/ui/Text";
 import { usePeriod } from "@/hooks/usePeriod";
@@ -50,6 +51,7 @@ export default function SavingsScreen() {
       <ScreenHeader
         title="Birikimler"
         description="Altın, döviz, nakit; neyi ne kadar biriktirdiğini takip et."
+        right={<YearStepper />}
       />
       <View className="mb-4 rounded-2xl p-4" style={{ backgroundColor: GOLD }}>
         <Text className="text-sm font-medium text-white/80">
