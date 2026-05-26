@@ -6,6 +6,7 @@ import { Icon } from '@/components/ui/Icon';
 import { cn } from '@/lib/cn';
 import { colors } from '@/theme/tokens';
 import { getMonthName } from '@/lib/formatters';
+import { haptics } from '@/lib/haptics';
 import { usePeriod } from '@/hooks/usePeriod';
 
 // value: null = "Tümü", 1-12 = ay
@@ -41,11 +42,23 @@ export function PeriodBar() {
   return (
     <View className="gap-3 pb-3">
       <View className="flex-row items-center justify-between">
-        <Pressable onPress={prevYear} hitSlop={8} className="p-1 active:opacity-60">
+        <Pressable
+          onPress={prevYear}
+          hitSlop={8}
+          accessibilityRole="button"
+          accessibilityLabel="Önceki yıl"
+          className="p-1 active:opacity-60"
+        >
           <Icon icon={ChevronLeft} size={22} color={colors.foreground} />
         </Pressable>
         <Text variant="h2">{year}</Text>
-        <Pressable onPress={nextYear} hitSlop={8} className="p-1 active:opacity-60">
+        <Pressable
+          onPress={nextYear}
+          hitSlop={8}
+          accessibilityRole="button"
+          accessibilityLabel="Sonraki yıl"
+          className="p-1 active:opacity-60"
+        >
           <Icon icon={ChevronRight} size={22} color={colors.foreground} />
         </Pressable>
       </View>
@@ -64,7 +77,13 @@ export function PeriodBar() {
           return (
             <Pressable
               key={chip.key}
-              onPress={() => setMonth(chip.value === null ? null : month === chip.value ? null : chip.value)}
+              accessibilityRole="button"
+              accessibilityState={{ selected: active }}
+              accessibilityLabel={chip.label}
+              onPress={() => {
+                haptics.selection();
+                setMonth(chip.value === null ? null : month === chip.value ? null : chip.value);
+              }}
               onLayout={(e: LayoutChangeEvent) => {
                 const { x, width } = e.nativeEvent.layout;
                 layouts.current[chip.key] = { x, width };

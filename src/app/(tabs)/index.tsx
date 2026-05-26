@@ -5,6 +5,7 @@ import { Plus } from 'lucide-react-native';
 import { ExpenseList } from '@/components/expenses/ExpenseList';
 import { ExpenseFormSheet, type ExpenseFormSheetRef } from '@/components/expenses/ExpenseFormSheet';
 import { Icon } from '@/components/ui/Icon';
+import { haptics } from '@/lib/haptics';
 import { colors } from '@/theme/tokens';
 
 export default function ExpensesScreen() {
@@ -15,7 +16,12 @@ export default function ExpensesScreen() {
       <ExpenseList onPressExpense={(e) => sheetRef.current?.present(e)} />
 
       <Pressable
-        onPress={() => sheetRef.current?.present()}
+        onPress={() => {
+          haptics.light();
+          sheetRef.current?.present();
+        }}
+        accessibilityRole="button"
+        accessibilityLabel="Yeni harcama ekle"
         className="absolute bottom-6 right-5 h-14 w-14 items-center justify-center rounded-full bg-accent active:opacity-80"
         style={{
           shadowColor: '#000',

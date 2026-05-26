@@ -5,6 +5,7 @@ import { Screen } from '@/components/ui/Screen';
 import { Text } from '@/components/ui/Text';
 import { Icon } from '@/components/ui/Icon';
 import { SkeletonCard } from '@/components/ui/SkeletonCard';
+import { ErrorState } from '@/components/ui/ErrorState';
 import { PeriodBar } from '@/components/expenses/PeriodBar';
 import { IncomeCard } from '@/components/income/IncomeCard';
 import { RecurringIncomeCard } from '@/components/income/RecurringIncomeCard';
@@ -15,6 +16,7 @@ import {
 } from '@/components/income/RecurringIncomeFormSheet';
 import { useGetIncomesQuery, useGetRecurringIncomesQuery } from '@/store/api';
 import { usePeriod } from '@/hooks/usePeriod';
+import { haptics } from '@/lib/haptics';
 import { formatCurrency } from '@/lib/formatters';
 
 const TEAL = '#0d9488';
@@ -23,7 +25,15 @@ function SectionHeader({ title, onAdd }: { title: string; onAdd: () => void }) {
   return (
     <View className="mb-2 mt-4 flex-row items-center justify-between">
       <Text variant="h2">{title}</Text>
-      <Pressable onPress={onAdd} className="flex-row items-center gap-1 active:opacity-60">
+      <Pressable
+        onPress={() => {
+          haptics.light();
+          onAdd();
+        }}
+        accessibilityRole="button"
+        accessibilityLabel={`${title} ekle`}
+        className="flex-row items-center gap-1 active:opacity-60"
+      >
         <Icon icon={Plus} size={18} color={TEAL} />
         <Text className="text-sm font-medium" style={{ color: TEAL }}>Ekle</Text>
       </Pressable>
@@ -79,6 +89,8 @@ export default function IncomeScreen() {
         <SectionHeader title="Bu Dönemin Gelirleri" onAdd={() => incomeSheet.current?.present()} />
         {incomes.isLoading ? (
           <SkeletonCard />
+        ) : incomes.isError && !(incomes.data ?? []).length ? (
+          <ErrorState onRetry={incomes.refetch} />
         ) : (incomes.data ?? []).length ? (
           (incomes.data ?? []).map((i) => (
             <IncomeCard key={i.id} income={i} onPress={(inc) => incomeSheet.current?.present(inc)} />

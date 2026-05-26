@@ -6,15 +6,17 @@ import { Plus, Repeat } from 'lucide-react-native';
 import { Text } from '@/components/ui/Text';
 import { Icon } from '@/components/ui/Icon';
 import { EmptyState } from '@/components/ui/EmptyState';
+import { ErrorState } from '@/components/ui/ErrorState';
 import { SkeletonCard } from '@/components/ui/SkeletonCard';
 import { RecurringCard } from '@/components/recurring/RecurringCard';
 import { RecurringFormSheet, type RecurringFormSheetRef } from '@/components/recurring/RecurringFormSheet';
 import { useGetRecurringQuery } from '@/store/api';
+import { haptics } from '@/lib/haptics';
 import { colors } from '@/theme/tokens';
 
 export default function RecurringScreen() {
   const sheetRef = useRef<RecurringFormSheetRef>(null);
-  const { data, isLoading, isFetching, refetch } = useGetRecurringQuery();
+  const { data, isLoading, isError, isFetching, refetch } = useGetRecurringQuery();
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: colors.background }} edges={['top']}>
@@ -33,14 +35,25 @@ export default function RecurringScreen() {
           )}
           contentContainerStyle={{ paddingHorizontal: 16, paddingTop: 16, paddingBottom: 24 }}
           ListHeaderComponent={<Text variant="h1" className="mb-3">Düzenli ödemeler</Text>}
-          ListEmptyComponent={<EmptyState message="Henüz düzenli ödeme yok." icon={Repeat} />}
+          ListEmptyComponent={
+            isError && !(data ?? []).length ? (
+              <ErrorState onRetry={refetch} />
+            ) : (
+              <EmptyState message="Henüz düzenli ödeme yok." icon={Repeat} />
+            )
+          }
           refreshing={isFetching}
           onRefresh={refetch}
         />
       )}
 
       <Pressable
-        onPress={() => sheetRef.current?.present()}
+        onPress={() => {
+          haptics.light();
+          sheetRef.current?.present();
+        }}
+        accessibilityRole="button"
+        accessibilityLabel="Yeni düzenli ödeme ekle"
         className="absolute bottom-6 right-5 h-14 w-14 items-center justify-center rounded-full bg-accent active:opacity-80"
         style={{
           shadowColor: '#000',

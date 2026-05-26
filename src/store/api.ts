@@ -5,6 +5,7 @@ import {
   type FetchArgs,
   type FetchBaseQueryError,
 } from '@reduxjs/toolkit/query/react';
+import { REHYDRATE } from 'redux-persist';
 import { API_URL } from '@/lib/config';
 import { getToken, clearToken } from '@/lib/secureToken';
 import type {
@@ -55,6 +56,13 @@ const baseQuery: BaseQueryFn<string | FetchArgs, unknown, FetchBaseQueryError> =
 export const api = createApi({
   reducerPath: 'api',
   baseQuery,
+  // Offline cache: redux-persist REHYDRATE'inde saklı RTK Query cache'ini geri yükle.
+  extractRehydrationInfo(action, { reducerPath }) {
+    if (action.type === REHYDRATE) {
+      return (action as { payload?: Record<string, unknown> }).payload?.[reducerPath] as never;
+    }
+    return undefined;
+  },
   tagTypes: ['Category', 'Expense', 'Recurring', 'Income', 'RecurringIncome', 'Analytics'],
   endpoints: (build) => ({
     // --- Auth ---

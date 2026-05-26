@@ -7,8 +7,9 @@ import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { BottomSheetModalProvider } from '@gorhom/bottom-sheet';
 import { Provider } from 'react-redux';
+import { PersistGate } from 'redux-persist/integration/react';
 
-import { store } from '@/store';
+import { store, persistor } from '@/store';
 import { useAppDispatch, useAppSelector } from '@/store/hooks';
 import { bootstrapAuth } from '@/store/slices/authSlice';
 import { ToastHost } from '@/components/ui/ToastHost';
@@ -42,12 +43,14 @@ export default function RootLayout() {
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
       <Provider store={store}>
-        <SafeAreaProvider>
-          <BottomSheetModalProvider>
-            <StatusBar style="dark" />
-            <RootNavigator />
-          </BottomSheetModalProvider>
-        </SafeAreaProvider>
+        <PersistGate loading={null} persistor={persistor}>
+          <SafeAreaProvider>
+            <BottomSheetModalProvider>
+              <StatusBar style="dark" />
+              <RootNavigator />
+            </BottomSheetModalProvider>
+          </SafeAreaProvider>
+        </PersistGate>
       </Provider>
     </GestureHandlerRootView>
   );

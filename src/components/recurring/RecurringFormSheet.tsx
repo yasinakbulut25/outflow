@@ -155,7 +155,7 @@ export const RecurringFormSheet = forwardRef<RecurringFormSheetRef>((_props, ref
       <BottomSheetScrollView contentContainerClassName="gap-4 px-4 pb-10" keyboardShouldPersistTaps="handled">
         <View className="flex-row items-center justify-between">
           <Text variant="h2">{editing ? 'Şablonu düzenle' : 'Yeni düzenli ödeme'}</Text>
-          <Pressable onPress={close} hitSlop={8} className="p-1 active:opacity-60">
+          <Pressable onPress={close} hitSlop={8} accessibilityRole="button" accessibilityLabel="Kapat" className="p-1 active:opacity-60">
             <Icon icon={X} size={22} color={colors.muted} />
           </Pressable>
         </View>

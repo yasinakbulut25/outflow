@@ -3,6 +3,7 @@ import { View, RefreshControl } from 'react-native';
 import { FlashList } from '@shopify/flash-list';
 import { Wallet } from 'lucide-react-native';
 import { EmptyState } from '@/components/ui/EmptyState';
+import { ErrorState } from '@/components/ui/ErrorState';
 import { SkeletonCard } from '@/components/ui/SkeletonCard';
 import { useGetExpensesQuery, useGetRecurringQuery } from '@/store/api';
 import { usePeriod } from '@/hooks/usePeriod';
@@ -16,7 +17,7 @@ export function ExpenseList({ onPressExpense }: { onPressExpense?: (e: Expense) 
   const { year, month } = usePeriod();
   // Backend materyalizasyonu GET'in yan etkisi ve bakılan aya bağlı; dönem değişince
   // taze veri çek ki "Tümü" görünümü ay gezinmesinin ürettiği satırları yansıtsın.
-  const { data, isLoading, isFetching, refetch } = useGetExpensesQuery(
+  const { data, isLoading, isError, isFetching, refetch } = useGetExpensesQuery(
     { year, month: month ?? undefined },
     { refetchOnMountOrArgChange: true },
   );
@@ -62,7 +63,13 @@ export function ExpenseList({ onPressExpense }: { onPressExpense?: (e: Expense) 
       renderItem={renderItem}
       contentContainerStyle={{ paddingHorizontal: 16, paddingBottom: 24 }}
       ListHeaderComponent={<PeriodBar />}
-      ListEmptyComponent={<EmptyState message="Bu dönemde harcama yok." icon={Wallet} />}
+      ListEmptyComponent={
+        isError && !groups.length ? (
+          <ErrorState onRetry={refetch} />
+        ) : (
+          <EmptyState message="Bu dönemde harcama yok." icon={Wallet} />
+        )
+      }
       refreshControl={<RefreshControl refreshing={isFetching} onRefresh={refetch} />}
     />
   );

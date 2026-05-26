@@ -6,6 +6,7 @@ import { Plus, PiggyBank } from 'lucide-react-native';
 import { Text } from '@/components/ui/Text';
 import { Icon } from '@/components/ui/Icon';
 import { EmptyState } from '@/components/ui/EmptyState';
+import { ErrorState } from '@/components/ui/ErrorState';
 import { SkeletonCard } from '@/components/ui/SkeletonCard';
 import { ExpenseCard } from '@/components/expenses/ExpenseCard';
 import { PeriodBar } from '@/components/expenses/PeriodBar';
@@ -15,12 +16,13 @@ import { usePeriod } from '@/hooks/usePeriod';
 import { displayAmount } from '@/lib/groupExpenses';
 import { formatCurrency } from '@/lib/formatters';
 import { BIRIKIM_CATEGORY_ID } from '@/lib/categoryIcons';
+import { haptics } from '@/lib/haptics';
 import { colors } from '@/theme/tokens';
 
 export default function SavingsScreen() {
   const sheetRef = useRef<ExpenseFormSheetRef>(null);
   const { year, month } = usePeriod();
-  const { data, isLoading, isFetching, refetch } = useGetExpensesQuery(
+  const { data, isLoading, isError, isFetching, refetch } = useGetExpensesQuery(
     { year, month: month ?? undefined },
     { refetchOnMountOrArgChange: true },
   );
@@ -64,14 +66,25 @@ export default function SavingsScreen() {
           )}
           contentContainerStyle={{ paddingHorizontal: 16, paddingTop: 16, paddingBottom: 24 }}
           ListHeaderComponent={header}
-          ListEmptyComponent={<EmptyState message="Bu dönemde birikim yok." icon={PiggyBank} />}
+          ListEmptyComponent={
+            isError && !savings.length ? (
+              <ErrorState onRetry={refetch} />
+            ) : (
+              <EmptyState message="Bu dönemde birikim yok." icon={PiggyBank} />
+            )
+          }
           refreshing={isFetching}
           onRefresh={refetch}
         />
       )}
 
       <Pressable
-        onPress={() => sheetRef.current?.present()}
+        onPress={() => {
+          haptics.light();
+          sheetRef.current?.present();
+        }}
+        accessibilityRole="button"
+        accessibilityLabel="Yeni birikim ekle"
         className="absolute bottom-6 right-5 h-14 w-14 items-center justify-center rounded-full bg-emerald active:opacity-80"
         style={{
           shadowColor: '#000',

@@ -5,6 +5,7 @@ import { Text } from '@/components/ui/Text';
 import { Icon } from '@/components/ui/Icon';
 import { Card } from '@/components/ui/Card';
 import { EmptyState } from '@/components/ui/EmptyState';
+import { ErrorState } from '@/components/ui/ErrorState';
 import { SkeletonCard } from '@/components/ui/SkeletonCard';
 import { SummaryCards } from '@/components/analytics/SummaryCards';
 import { MonthlyBars } from '@/components/analytics/MonthlyBars';
@@ -25,7 +26,7 @@ function Section({ title, children }: { title: string; children: React.ReactNode
 
 export default function AnalyticsScreen() {
   const { year, prevYear, nextYear } = usePeriod();
-  const { data, isLoading, isFetching, refetch } = useGetAnalyticsQuery(year, {
+  const { data, isLoading, isError, isFetching, refetch } = useGetAnalyticsQuery(year, {
     refetchOnMountOrArgChange: true,
   });
 
@@ -38,11 +39,23 @@ export default function AnalyticsScreen() {
   return (
     <Screen scroll refreshing={isFetching} onRefresh={refetch}>
       <View className="flex-row items-center justify-between">
-        <Pressable onPress={prevYear} hitSlop={8} className="p-1 active:opacity-60">
+        <Pressable
+          onPress={prevYear}
+          hitSlop={8}
+          accessibilityRole="button"
+          accessibilityLabel="Önceki yıl"
+          className="p-1 active:opacity-60"
+        >
           <Icon icon={ChevronLeft} size={22} color={colors.foreground} />
         </Pressable>
         <Text variant="h1">{year}</Text>
-        <Pressable onPress={nextYear} hitSlop={8} className="p-1 active:opacity-60">
+        <Pressable
+          onPress={nextYear}
+          hitSlop={8}
+          accessibilityRole="button"
+          accessibilityLabel="Sonraki yıl"
+          className="p-1 active:opacity-60"
+        >
           <Icon icon={ChevronRight} size={22} color={colors.foreground} />
         </Pressable>
       </View>
@@ -53,6 +66,8 @@ export default function AnalyticsScreen() {
           <SkeletonCard />
           <SkeletonCard />
         </View>
+      ) : isError && !data ? (
+        <ErrorState onRetry={refetch} />
       ) : !hasData ? (
         <EmptyState message="Bu yıl için analiz verisi yok." />
       ) : (
