@@ -1,4 +1,5 @@
-import { View, Pressable, ScrollView } from 'react-native';
+import { useEffect, useRef } from 'react';
+import { View, Pressable, ScrollView, type LayoutChangeEvent } from 'react-native';
 import { ChevronLeft, ChevronRight } from 'lucide-react-native';
 import { Text } from '@/components/ui/Text';
 import { Icon } from '@/components/ui/Icon';
@@ -7,24 +8,35 @@ import { colors } from '@/theme/tokens';
 import { getMonthName } from '@/lib/formatters';
 import { usePeriod } from '@/hooks/usePeriod';
 
-const MONTHS = Array.from({ length: 12 }, (_, i) => i + 1);
+// value: null = "Tümü", 1-12 = ay
+const CHIPS: { key: string; label: string; value: number | null }[] = [
+  { key: 'all', label: 'Tümü', value: null },
+  ...Array.from({ length: 12 }, (_, i) => ({ key: String(i + 1), label: getMonthName(i + 1), value: i + 1 })),
+];
 
-function Chip({ label, active, onPress }: { label: string; active: boolean; onPress: () => void }) {
-  return (
-    <Pressable
-      onPress={onPress}
-      className={cn(
-        'rounded-full px-3.5 py-1.5 active:opacity-70',
-        active ? 'bg-accent' : 'bg-surface border border-border',
-      )}
-    >
-      <Text className={cn('text-sm font-medium', active ? 'text-white' : 'text-muted')}>{label}</Text>
-    </Pressable>
-  );
+/** Çipi yatay listede ortalayacak scroll x'i (saf — ref okumaz). */
+function centerX(x: number, width: number, containerWidth: number): number {
+  return Math.max(0, x + width / 2 - containerWidth / 2);
 }
 
 export function PeriodBar() {
   const { year, month, setMonth, prevYear, nextYear } = usePeriod();
+
+  const scrollRef = useRef<ScrollView>(null);
+  const layouts = useRef<Record<string, { x: number; width: number }>>({});
+  const containerWidth = useRef(0);
+  const didInitialScroll = useRef(false);
+
+  const selectedKey = month === null ? 'all' : String(month);
+
+  // Seçim değiştiğinde (ölçümler hazırsa) seçili çipi ortala.
+  useEffect(() => {
+    if (!didInitialScroll.current) return;
+    const l = layouts.current[selectedKey];
+    if (l && containerWidth.current) {
+      scrollRef.current?.scrollTo({ x: centerX(l.x, l.width, containerWidth.current), animated: true });
+    }
+  }, [selectedKey]);
 
   return (
     <View className="gap-3 pb-3">
@@ -39,19 +51,38 @@ export function PeriodBar() {
       </View>
 
       <ScrollView
+        ref={scrollRef}
         horizontal
         showsHorizontalScrollIndicator={false}
         contentContainerClassName="gap-2 px-0.5"
+        onLayout={(e) => {
+          containerWidth.current = e.nativeEvent.layout.width;
+        }}
       >
-        <Chip label="Tümü" active={month === null} onPress={() => setMonth(null)} />
-        {MONTHS.map((m) => (
-          <Chip
-            key={m}
-            label={getMonthName(m)}
-            active={month === m}
-            onPress={() => setMonth(month === m ? null : m)}
-          />
-        ))}
+        {CHIPS.map((chip) => {
+          const active = month === chip.value;
+          return (
+            <Pressable
+              key={chip.key}
+              onPress={() => setMonth(chip.value === null ? null : month === chip.value ? null : chip.value)}
+              onLayout={(e: LayoutChangeEvent) => {
+                const { x, width } = e.nativeEvent.layout;
+                layouts.current[chip.key] = { x, width };
+                // İlk render: seçili çip ölçülünce animasyonsuz ortala.
+                if (!didInitialScroll.current && chip.key === selectedKey && containerWidth.current) {
+                  didInitialScroll.current = true;
+                  scrollRef.current?.scrollTo({ x: centerX(x, width, containerWidth.current), animated: false });
+                }
+              }}
+              className={cn(
+                'rounded-full px-3.5 py-1.5 active:opacity-70',
+                active ? 'bg-accent' : 'bg-surface border border-border',
+              )}
+            >
+              <Text className={cn('text-sm font-medium', active ? 'text-white' : 'text-muted')}>{chip.label}</Text>
+            </Pressable>
+          );
+        })}
       </ScrollView>
     </View>
   );
