@@ -1,5 +1,5 @@
 import { Redirect, Tabs } from 'expo-router';
-import { Wallet, TrendingUp, PiggyBank, BarChart3, Repeat } from 'lucide-react-native';
+import { Wallet, TrendingUp, HandCoins, BarChart3, Repeat } from 'lucide-react-native';
 import { useAppSelector } from '@/store/hooks';
 import { colors } from '@/theme/tokens';
 
@@ -28,7 +28,7 @@ export default function TabsLayout() {
       />
       <Tabs.Screen
         name="birikimler"
-        options={{ title: 'Birikimler', tabBarIcon: ({ color, size }) => <PiggyBank color={color} size={size} /> }}
+        options={{ title: 'Birikimler', tabBarIcon: ({ color, size }) => <HandCoins color={color} size={size} /> }}
       />
       <Tabs.Screen
         name="analiz"

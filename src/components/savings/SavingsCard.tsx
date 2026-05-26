@@ -1,5 +1,5 @@
 import { View, Pressable } from 'react-native';
-import { PiggyBank } from 'lucide-react-native';
+import { HandCoins } from 'lucide-react-native';
 import { Card } from '@/components/ui/Card';
 import { Text } from '@/components/ui/Text';
 import { Icon } from '@/components/ui/Icon';
@@ -18,7 +18,7 @@ export function SavingsCard({ saving, onPress }: { saving: Expense; onPress?: (e
       <Card className="mb-2">
         <View className="flex-row items-center gap-3">
           <View className="h-9 w-9 items-center justify-center rounded-full" style={{ backgroundColor: EMERALD + '1a' }}>
-            <Icon icon={PiggyBank} size={18} color={EMERALD} />
+            <Icon icon={HandCoins} size={18} color={EMERALD} />
           </View>
 
           <View className="flex-1">

@@ -2,7 +2,7 @@ import { useMemo, useRef } from 'react';
 import { View, Pressable } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { FlashList } from '@shopify/flash-list';
-import { Plus, PiggyBank } from 'lucide-react-native';
+import { Plus, HandCoins } from 'lucide-react-native';
 import { Text } from '@/components/ui/Text';
 import { Icon } from '@/components/ui/Icon';
 import { EmptyState } from '@/components/ui/EmptyState';
@@ -70,7 +70,7 @@ export default function SavingsScreen() {
             isError && !savings.length ? (
               <ErrorState onRetry={refetch} />
             ) : (
-              <EmptyState message="Bu dönemde birikim yok." icon={PiggyBank} />
+              <EmptyState message="Bu dönemde birikim yok." icon={HandCoins} />
             )
           }
           refreshing={isFetching}

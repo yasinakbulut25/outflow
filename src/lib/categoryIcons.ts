@@ -1,6 +1,6 @@
 import {
   Fuel, ShoppingCart, FileText, Shirt, Laptop, HeartPulse, Clapperboard,
-  UtensilsCrossed, Bus, ShoppingBag, BookOpen, Package, PiggyBank,
+  UtensilsCrossed, Bus, ShoppingBag, BookOpen, Package, HandCoins,
 } from 'lucide-react-native';
 import type { IconComponent } from '@/components/ui/Icon';
 import { colors } from '@/theme/tokens';
@@ -21,7 +21,7 @@ export const CATEGORY_ICONS: Record<number, { Icon: IconComponent; color: string
   10: { Icon: ShoppingBag, color: '#A855F7' },
   11: { Icon: BookOpen, color: '#10B981' },
   12: { Icon: Package, color: '#6B7280' },
-  13: { Icon: PiggyBank, color: '#059669' },
+  13: { Icon: HandCoins, color: '#059669' },
 };
 
 export function categoryIcon(id?: number): { Icon: IconComponent; color: string } {
