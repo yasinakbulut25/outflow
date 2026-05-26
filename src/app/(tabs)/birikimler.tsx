@@ -20,7 +20,10 @@ import { colors } from '@/theme/tokens';
 export default function SavingsScreen() {
   const sheetRef = useRef<ExpenseFormSheetRef>(null);
   const { year, month } = usePeriod();
-  const { data, isLoading, isFetching, refetch } = useGetExpensesQuery({ year, month: month ?? undefined });
+  const { data, isLoading, isFetching, refetch } = useGetExpensesQuery(
+    { year, month: month ?? undefined },
+    { refetchOnMountOrArgChange: true },
+  );
 
   const savings = useMemo(
     () =>

@@ -13,10 +13,12 @@ import type { Expense } from '@/types';
 
 export function ExpenseList({ onPressExpense }: { onPressExpense?: (e: Expense) => void }) {
   const { year, month } = usePeriod();
-  const { data, isLoading, isFetching, refetch } = useGetExpensesQuery({
-    year,
-    month: month ?? undefined,
-  });
+  // Backend materyalizasyonu GET'in yan etkisi ve bakılan aya bağlı; dönem değişince
+  // taze veri çek ki "Tümü" görünümü ay gezinmesinin ürettiği satırları yansıtsın.
+  const { data, isLoading, isFetching, refetch } = useGetExpensesQuery(
+    { year, month: month ?? undefined },
+    { refetchOnMountOrArgChange: true },
+  );
 
   const groups = useMemo(() => groupExpensesByMonthAndDay(data ?? []), [data]);
 
