@@ -18,7 +18,8 @@ import { SavingsCard } from '@/components/savings/SavingsCard';
 import type { MonthGroup as MonthGroupModel } from '@/lib/groupExpenses';
 import type { Expense } from '@/types';
 
-const EMERALD = '#d97706';
+const EMERALD = '#d97706'; // birikim (altın)
+const PURPLE = '#8b5cf6'; // düzenli ödeme (mor)
 
 interface Props {
   group: MonthGroupModel;
@@ -40,18 +41,18 @@ function RecurringSection({ group, onPressExpense }: { group: MonthGroupModel; o
   };
 
   return (
-    <View className="mt-1 rounded-xl border border-border bg-surface">
+    <View className="mt-1 rounded-xl border" style={{ borderColor: PURPLE + '33', backgroundColor: PURPLE + '0d' }}>
       <Pressable onPress={toggle} className="flex-row items-center gap-3 px-3 py-3 active:opacity-70">
         <View className="h-8 w-8 items-center justify-center rounded-full bg-white">
-          <Icon icon={Repeat} size={16} color={colors.muted} />
+          <Icon icon={Repeat} size={16} color={PURPLE} />
         </View>
         <View className="flex-1">
           <Text variant="body" className="font-medium">Düzenli Ödemeler</Text>
           <Text variant="muted">{group.recurring.length} ödeme</Text>
         </View>
-        <Text variant="mono">{formatCurrency(group.recurringAmount)} ₺</Text>
+        <Text variant="mono" style={{ color: PURPLE }}>{formatCurrency(group.recurringAmount)} ₺</Text>
         <Animated.View style={chevronStyle}>
-          <Icon icon={ChevronDown} size={18} color={colors.muted} />
+          <Icon icon={ChevronDown} size={18} color={PURPLE} />
         </Animated.View>
       </Pressable>
 
@@ -132,7 +133,7 @@ export function MonthGroup({ group, defaultExpanded = false, onPressExpense, onP
               <Text variant="muted">Taksit {formatCurrency(group.installmentAmount)} ₺</Text>
             ) : null}
             {group.recurringAmount > 0 ? (
-              <Text variant="muted">Düzenli {formatCurrency(group.recurringAmount)} ₺</Text>
+              <Text variant="muted" style={{ color: PURPLE }}>Düzenli {formatCurrency(group.recurringAmount)} ₺</Text>
             ) : null}
             {group.savingsAmount > 0 ? (
               <Text variant="muted" style={{ color: EMERALD }}>Birikim ≈ {formatCurrency(group.savingsAmount)} ₺</Text>
