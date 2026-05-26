@@ -28,6 +28,12 @@ export interface ExpenseFormSheetRef {
   present: (expense?: Expense) => void;
 }
 
+interface ExpenseFormSheetProps {
+  /** Verilirse kategori bu id'ye sabitlenir ve kategori seçimi gizlenir (örn. birikim = 13). */
+  forcedCategoryId?: number;
+  labels?: { create: string; edit: string };
+}
+
 interface ItemRow {
   key: string;
   name: string;
@@ -41,7 +47,8 @@ function toISODate(d: Date): string {
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
 }
 
-export const ExpenseFormSheet = forwardRef<ExpenseFormSheetRef>((_props, ref) => {
+export const ExpenseFormSheet = forwardRef<ExpenseFormSheetRef, ExpenseFormSheetProps>((props, ref) => {
+  const { forcedCategoryId, labels = { create: 'Yeni harcama', edit: 'Harcamayı düzenle' } } = props;
   const sheetRef = useRef<BottomSheetModal>(null);
   const dispatch = useAppDispatch();
   const { data: categories } = useGetCategoriesQuery();
@@ -71,12 +78,12 @@ export const ExpenseFormSheet = forwardRef<ExpenseFormSheetRef>((_props, ref) =>
       setEditing(null);
       setTitle('');
       setDate(new Date());
-      setCategoryId(undefined);
+      setCategoryId(forcedCategoryId);
       setPaymentType('cash');
       setInstallmentCount(2);
       setItems([newRow()]);
     }
-  }, []);
+  }, [forcedCategoryId]);
 
   useImperativeHandle(ref, () => ({
     present: (expense?: Expense) => {
@@ -173,7 +180,7 @@ export const ExpenseFormSheet = forwardRef<ExpenseFormSheetRef>((_props, ref) =>
     >
       <BottomSheetScrollView contentContainerClassName="gap-4 px-4 pb-10" keyboardShouldPersistTaps="handled">
         <View className="flex-row items-center justify-between">
-          <Text variant="h2">{editing ? 'Harcamayı düzenle' : 'Yeni harcama'}</Text>
+          <Text variant="h2">{editing ? labels.edit : labels.create}</Text>
           <Pressable onPress={close} hitSlop={8} className="p-1 active:opacity-60">
             <Icon icon={X} size={22} color={colors.muted} />
           </Pressable>
@@ -203,6 +210,7 @@ export const ExpenseFormSheet = forwardRef<ExpenseFormSheetRef>((_props, ref) =>
           />
         ) : null}
 
+        {forcedCategoryId === undefined ? (
         <Field label="Kategori">
           <View className="flex-row flex-wrap gap-2">
             {(categories ?? []).map((cat) => {
@@ -224,6 +232,7 @@ export const ExpenseFormSheet = forwardRef<ExpenseFormSheetRef>((_props, ref) =>
             })}
           </View>
         </Field>
+        ) : null}
 
         <Field label="Ödeme tipi">
           <View className="flex-row rounded-xl border border-border bg-surface p-1">
