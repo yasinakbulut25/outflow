@@ -13,8 +13,8 @@ export default function TabsLayout() {
     expenses: '#3b82f6', // mavi
     income: '#16a34a', // yeşil
     savings: '#d97706', // altın
-    analytics: '#8b5cf6', // mor
-    recurring: '#f43f5e', // gül
+    analytics: '#f43f5e', // kırmızı
+    recurring: '#8b5cf6', // mor
   };
 
   return (
