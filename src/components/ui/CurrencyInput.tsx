@@ -12,9 +12,10 @@ interface CurrencyInputProps {
   className?: string;
 }
 
-/** Girdiyi rakam + tek ondalık ayırıcıya (virgül) indirger, ondalığı 2 haneyle sınırlar. */
+/** Girdiyi rakam + tek ondalık ayırıcıya (virgül) indirger, ondalığı 2 haneyle sınırlar.
+ *  Binlik noktaları (gösterimden gelen) silinir — virgül = ondalık, nokta = ayırıcı. */
 function sanitize(raw: string): string {
-  let s = raw.replace(/[^\d.,]/g, '').replace(/\./g, ',');
+  let s = raw.replace(/[^\d,]/g, '');
   const i = s.indexOf(',');
   if (i !== -1) {
     const intPart = s.slice(0, i).replace(/,/g, '');
