@@ -1,4 +1,5 @@
 import type { Expense } from '@/types';
+import { BIRIKIM_CATEGORY_ID } from '@/lib/categoryIcons';
 
 // Harcamaları aya ve güne göre gruplar (SPEC.md §10.2). Web ile aynı mantık.
 // Taksit gösterim aylarında installment_display_month kullanılır.
@@ -14,12 +15,14 @@ export interface MonthGroup {
   year: number;
   month: number; // 1-12
   monthKey: string; // "2026-05"
-  totalAmount: number; // ayın toplamı (tek seferlik + taksit + düzenli)
+  totalAmount: number; // ayın GİDER toplamı (tek seferlik + taksit + düzenli; birikim hariç)
   cashAmount: number; // düzenli olmayan peşin
   installmentAmount: number; // düzenli olmayan taksit
   recurringAmount: number; // düzenli ödemeler toplamı (gerçek + planlanan)
-  days: DayGroup[]; // yalnız düzenli OLMAYAN giderler
+  savingsAmount: number; // birikim (kategori 13) — TL değeri girilenlerin toplamı; gidere dahil DEĞİL
+  days: DayGroup[]; // yalnız düzenli/birikim OLMAYAN giderler
   recurring: Expense[]; // düzenli ödemeler (tarihe göre artan)
+  savings: Expense[]; // birikimler (tarihe göre artan)
 }
 
 /** Bir harcamanın bu listedeki gösterim tarihini döndürür (taksit ayı varsa onu kullanır). */
@@ -48,12 +51,20 @@ export function groupExpensesByMonthAndDay(expenses: Expense[]): MonthGroup[] {
     if (!monthMap.has(monthKey)) {
       monthMap.set(monthKey, {
         year, month, monthKey,
-        totalAmount: 0, cashAmount: 0, installmentAmount: 0, recurringAmount: 0,
-        days: [], recurring: [],
+        totalAmount: 0, cashAmount: 0, installmentAmount: 0, recurringAmount: 0, savingsAmount: 0,
+        days: [], recurring: [], savings: [],
       });
     }
 
     const monthGroup = monthMap.get(monthKey)!;
+
+    // Birikim (kategori 13) → ayrı bölüm; gider değildir, toplama dahil edilmez.
+    if (expense.category_id === BIRIKIM_CATEGORY_ID) {
+      monthGroup.savingsAmount += amount;
+      monthGroup.savings.push(expense);
+      continue;
+    }
+
     monthGroup.totalAmount += amount;
 
     if (expense.recurring_template_id) {
@@ -80,6 +91,7 @@ export function groupExpensesByMonthAndDay(expenses: Expense[]): MonthGroup[] {
   for (const month of monthMap.values()) {
     month.days.sort((a, b) => b.date.localeCompare(a.date));
     month.recurring.sort((a, b) => a.expense_date.localeCompare(b.expense_date));
+    month.savings.sort((a, b) => a.expense_date.localeCompare(b.expense_date));
   }
 
   return Array.from(monthMap.values()).sort((a, b) => b.monthKey.localeCompare(a.monthKey));

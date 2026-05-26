@@ -4,16 +4,21 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { Plus } from 'lucide-react-native';
 import { ExpenseList } from '@/components/expenses/ExpenseList';
 import { ExpenseFormSheet, type ExpenseFormSheetRef } from '@/components/expenses/ExpenseFormSheet';
+import { SavingsFormSheet, type SavingsFormSheetRef } from '@/components/savings/SavingsFormSheet';
 import { Icon } from '@/components/ui/Icon';
 import { haptics } from '@/lib/haptics';
 import { colors } from '@/theme/tokens';
 
 export default function ExpensesScreen() {
   const sheetRef = useRef<ExpenseFormSheetRef>(null);
+  const savingsSheet = useRef<SavingsFormSheetRef>(null);
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: colors.background }} edges={['top']}>
-      <ExpenseList onPressExpense={(e) => sheetRef.current?.present(e)} />
+      <ExpenseList
+        onPressExpense={(e) => sheetRef.current?.present(e)}
+        onPressSaving={(e) => savingsSheet.current?.present(e)}
+      />
 
       <Pressable
         onPress={() => {
@@ -35,6 +40,7 @@ export default function ExpensesScreen() {
       </Pressable>
 
       <ExpenseFormSheet ref={sheetRef} />
+      <SavingsFormSheet ref={savingsSheet} />
     </SafeAreaView>
   );
 }

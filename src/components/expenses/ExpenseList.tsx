@@ -13,7 +13,13 @@ import { PeriodBar } from './PeriodBar';
 import { MonthGroup } from './MonthGroup';
 import type { Expense } from '@/types';
 
-export function ExpenseList({ onPressExpense }: { onPressExpense?: (e: Expense) => void }) {
+export function ExpenseList({
+  onPressExpense,
+  onPressSaving,
+}: {
+  onPressExpense?: (e: Expense) => void;
+  onPressSaving?: (e: Expense) => void;
+}) {
   const { year, month } = usePeriod();
   // Backend materyalizasyonu GET'in yan etkisi ve bakılan aya bağlı; dönem değişince
   // taze veri çek ki "Tümü" görünümü ay gezinmesinin ürettiği satırları yansıtsın.
@@ -40,9 +46,14 @@ export function ExpenseList({ onPressExpense }: { onPressExpense?: (e: Expense) 
 
   const renderItem = useCallback(
     ({ item }: { item: (typeof groups)[number] }) => (
-      <MonthGroup group={item} defaultExpanded={item.monthKey === expandKey} onPressExpense={onPressExpense} />
+      <MonthGroup
+        group={item}
+        defaultExpanded={item.monthKey === expandKey}
+        onPressExpense={onPressExpense}
+        onPressSaving={onPressSaving}
+      />
     ),
-    [onPressExpense, expandKey],
+    [onPressExpense, onPressSaving, expandKey],
   );
 
   if (isLoading) {
