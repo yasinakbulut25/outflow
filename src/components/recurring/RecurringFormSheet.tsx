@@ -1,7 +1,7 @@
 import { forwardRef, useCallback, useImperativeHandle, useRef, useState } from 'react';
-import { View, Pressable, Platform, Alert, Switch } from 'react-native';
+import { View, Pressable, Alert, Switch } from 'react-native';
 import { BottomSheetModal, BottomSheetScrollView, BottomSheetBackdrop } from '@gorhom/bottom-sheet';
-import DateTimePicker from '@react-native-community/datetimepicker';
+import { DatePicker } from '@/components/ui/DatePicker';
 import { Trash2, X } from 'lucide-react-native';
 import { Text } from '@/components/ui/Text';
 import { Input } from '@/components/ui/Input';
@@ -215,21 +215,12 @@ export const RecurringFormSheet = forwardRef<RecurringFormSheetRef>((_props, ref
           </View>
         </Field>
 
-        {picker ? (
-          <DateTimePicker
-            value={picker === 'start' ? startDate : (endDate ?? startDate)}
-            mode="date"
-            display={Platform.OS === 'ios' ? 'inline' : 'default'}
-            onChange={(_e, picked) => {
-              const target = picker;
-              setPicker(Platform.OS === 'ios' ? target : null);
-              if (picked) {
-                if (target === 'start') setStartDate(picked);
-                else setEndDate(picked);
-              }
-            }}
-          />
-        ) : null}
+        <DatePicker
+          visible={picker !== null}
+          value={picker === 'end' ? (endDate ?? startDate) : startDate}
+          onConfirm={(d) => (picker === 'end' ? setEndDate(d) : setStartDate(d))}
+          onClose={() => setPicker(null)}
+        />
 
         <Field label="Kategori">
           <View className="flex-row flex-wrap gap-2">

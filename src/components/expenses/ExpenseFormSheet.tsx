@@ -1,7 +1,7 @@
 import { forwardRef, useCallback, useImperativeHandle, useMemo, useRef, useState } from 'react';
-import { View, Pressable, Platform, Alert } from 'react-native';
+import { View, Pressable, Alert } from 'react-native';
 import { BottomSheetModal, BottomSheetScrollView, BottomSheetBackdrop } from '@gorhom/bottom-sheet';
-import DateTimePicker from '@react-native-community/datetimepicker';
+import { DatePicker } from '@/components/ui/DatePicker';
 import { Plus, Trash2, X } from 'lucide-react-native';
 import { Text } from '@/components/ui/Text';
 import { Input } from '@/components/ui/Input';
@@ -198,17 +198,12 @@ export const ExpenseFormSheet = forwardRef<ExpenseFormSheetRef, ExpenseFormSheet
             <Text variant="body" className="capitalize">{formatDate(toISODate(date))}</Text>
           </Pressable>
         </Field>
-        {showDatePicker ? (
-          <DateTimePicker
-            value={date}
-            mode="date"
-            display={Platform.OS === 'ios' ? 'inline' : 'default'}
-            onChange={(_e, picked) => {
-              setShowDatePicker(Platform.OS === 'ios');
-              if (picked) setDate(picked);
-            }}
-          />
-        ) : null}
+        <DatePicker
+          visible={showDatePicker}
+          value={date}
+          onConfirm={setDate}
+          onClose={() => setShowDatePicker(false)}
+        />
 
         {forcedCategoryId === undefined ? (
         <Field label="Kategori">
