@@ -231,13 +231,16 @@ export const RecurringFormSheet = forwardRef<RecurringFormSheetRef>((_props, ref
                 <Pressable
                   key={cat.id}
                   onPress={() => setCategoryId(sel ? undefined : cat.id)}
+                  style={sel ? { backgroundColor: color, borderColor: color } : undefined}
                   className={cn(
                     'flex-row items-center gap-1.5 rounded-full border px-3 py-1.5 active:opacity-70',
-                    sel ? 'border-accent bg-accent' : 'border-border bg-white',
+                    sel ? '' : 'border-border bg-white',
                   )}
                 >
                   <Icon icon={CatIcon} size={15} color={sel ? colors.white : color} />
-                  <Text className={cn('text-sm', sel ? 'text-white' : 'text-foreground')}>{cat.name}</Text>
+                  <Text className={cn('text-sm', sel ? 'font-semibold text-white' : 'text-foreground')}>
+                    {cat.name}
+                  </Text>
                 </Pressable>
               );
             })}

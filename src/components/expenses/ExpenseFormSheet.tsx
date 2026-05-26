@@ -215,13 +215,16 @@ export const ExpenseFormSheet = forwardRef<ExpenseFormSheetRef, ExpenseFormSheet
                 <Pressable
                   key={cat.id}
                   onPress={() => setCategoryId(active ? undefined : cat.id)}
+                  style={active ? { backgroundColor: color, borderColor: color } : undefined}
                   className={cn(
                     'flex-row items-center gap-1.5 rounded-full border px-3 py-1.5 active:opacity-70',
-                    active ? 'border-accent bg-accent' : 'border-border bg-white',
+                    active ? '' : 'border-border bg-white',
                   )}
                 >
                   <Icon icon={CatIcon} size={15} color={active ? colors.white : color} />
-                  <Text className={cn('text-sm', active ? 'text-white' : 'text-foreground')}>{cat.name}</Text>
+                  <Text className={cn('text-sm', active ? 'font-semibold text-white' : 'text-foreground')}>
+                    {cat.name}
+                  </Text>
                 </Pressable>
               );
             })}
