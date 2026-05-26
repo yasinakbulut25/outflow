@@ -16,7 +16,7 @@ interface UiState {
 const initialState: UiState = {
   toasts: [],
   selectedYear: new Date().getFullYear(),
-  selectedMonth: null,
+  selectedMonth: new Date().getMonth() + 1, // açılışta cari ay seçili
 };
 
 const uiSlice = createSlice({
