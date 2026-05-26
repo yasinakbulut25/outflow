@@ -56,8 +56,9 @@ export default function RecurringScreen() {
         }}
         accessibilityRole="button"
         accessibilityLabel="Yeni düzenli ödeme ekle"
-        className="absolute bottom-6 right-5 h-14 w-14 items-center justify-center rounded-full bg-accent active:opacity-80"
+        className="absolute bottom-6 right-5 h-14 w-14 items-center justify-center rounded-full active:opacity-80"
         style={{
+          backgroundColor: '#8b5cf6',
           shadowColor: '#000',
           shadowOffset: { width: 0, height: 2 },
           shadowOpacity: 0.2,
