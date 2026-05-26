@@ -20,7 +20,7 @@ import { usePeriod } from '@/hooks/usePeriod';
 import { haptics } from '@/lib/haptics';
 import { formatCurrency } from '@/lib/formatters';
 
-const TEAL = '#0d9488';
+const TEAL = '#16a34a';
 
 function SectionHeader({ title, onAdd }: { title: string; onAdd: () => void }) {
   return (

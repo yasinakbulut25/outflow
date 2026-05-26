@@ -7,7 +7,7 @@ import { Badge } from '@/components/ui/Badge';
 import { formatCurrency, formatDate } from '@/lib/formatters';
 import type { Income } from '@/types';
 
-const TEAL = '#0d9488';
+const TEAL = '#16a34a';
 
 export function IncomeCard({ income, onPress }: { income: Income; onPress?: (i: Income) => void }) {
   const isRecurring = !!income.recurring_income_id;

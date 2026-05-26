@@ -7,7 +7,7 @@ import { Badge } from '@/components/ui/Badge';
 import { formatCurrency } from '@/lib/formatters';
 import type { RecurringIncomeTemplate } from '@/types';
 
-const TEAL = '#0d9488';
+const TEAL = '#16a34a';
 
 export function RecurringIncomeCard({
   template,

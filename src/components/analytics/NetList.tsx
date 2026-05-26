@@ -5,7 +5,7 @@ import { Icon } from '@/components/ui/Icon';
 import { getMonthName, formatCurrency } from '@/lib/formatters';
 import type { MonthlyNet } from '@/types';
 
-const TEAL = '#0d9488';
+const TEAL = '#16a34a';
 const RED = '#ef4444';
 
 function monthNo(m: string): number {

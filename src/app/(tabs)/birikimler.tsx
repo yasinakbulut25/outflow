@@ -23,6 +23,8 @@ import { useMemo, useRef } from "react";
 import { Pressable, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
+const GOLD = '#d97706'; // birikim teması (altın)
+
 export default function SavingsScreen() {
   const sheetRef = useRef<SavingsFormSheetRef>(null);
   const { year, month } = usePeriod();
@@ -49,7 +51,7 @@ export default function SavingsScreen() {
         title="Birikimler"
         description="Altın, döviz, nakit; neyi ne kadar biriktirdiğini takip et."
       />
-      <View className="mb-4 rounded-2xl bg-emerald p-4">
+      <View className="mb-4 rounded-2xl p-4" style={{ backgroundColor: GOLD }}>
         <Text className="text-sm font-medium text-white/80">
           Toplam birikim
         </Text>
@@ -113,8 +115,9 @@ export default function SavingsScreen() {
         }}
         accessibilityRole="button"
         accessibilityLabel="Yeni birikim ekle"
-        className="absolute bottom-6 right-5 h-14 w-14 items-center justify-center rounded-full bg-emerald active:opacity-80"
+        className="absolute bottom-6 right-5 h-14 w-14 items-center justify-center rounded-full active:opacity-80"
         style={{
+          backgroundColor: GOLD,
           shadowColor: "#000",
           shadowOffset: { width: 0, height: 2 },
           shadowOpacity: 0.2,

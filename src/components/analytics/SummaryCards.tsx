@@ -4,7 +4,7 @@ import { Text } from '@/components/ui/Text';
 import { Icon } from '@/components/ui/Icon';
 import { formatCurrency } from '@/lib/formatters';
 
-const TEAL = '#0d9488';
+const TEAL = '#16a34a';
 const RED = '#ef4444';
 
 function StatCard({

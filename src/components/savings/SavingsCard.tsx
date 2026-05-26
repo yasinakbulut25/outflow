@@ -6,7 +6,7 @@ import { Icon } from '@/components/ui/Icon';
 import { formatCurrency, formatDate } from '@/lib/formatters';
 import type { Expense } from '@/types';
 
-const EMERALD = '#059669';
+const EMERALD = '#d97706';
 
 // Birikim kartı: ne (title) + ne kadar (note/miktar) öne çıkar; ₺ değeri varsa altta.
 export function SavingsCard({ saving, onPress }: { saving: Expense; onPress?: (e: Expense) => void }) {

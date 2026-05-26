@@ -8,11 +8,19 @@ export default function TabsLayout() {
   // Auth gate: oturum yoksa girişe yönlendir.
   if (!user) return <Redirect href="/(auth)/login" />;
 
+  // Her sekmenin kendi aktif rengi; pasifken hepsi muted gri.
+  const TAB_COLORS = {
+    expenses: '#3b82f6', // mavi
+    income: '#16a34a', // yeşil
+    savings: '#d97706', // altın
+    analytics: '#8b5cf6', // mor
+    recurring: '#f43f5e', // gül
+  };
+
   return (
     <Tabs
       screenOptions={{
         headerShown: false,
-        tabBarActiveTintColor: colors.accent,
         tabBarInactiveTintColor: colors.muted,
         tabBarStyle: { borderTopColor: colors.border },
         tabBarLabelStyle: { fontSize: 11 },
@@ -20,23 +28,43 @@ export default function TabsLayout() {
     >
       <Tabs.Screen
         name="index"
-        options={{ title: 'Harcamalar', tabBarIcon: ({ color, size }) => <Wallet color={color} size={size} /> }}
+        options={{
+          title: 'Harcamalar',
+          tabBarActiveTintColor: TAB_COLORS.expenses,
+          tabBarIcon: ({ color, size }) => <Wallet color={color} size={size} />,
+        }}
       />
       <Tabs.Screen
         name="gelirler"
-        options={{ title: 'Gelirler', tabBarIcon: ({ color, size }) => <TrendingUp color={color} size={size} /> }}
+        options={{
+          title: 'Gelirler',
+          tabBarActiveTintColor: TAB_COLORS.income,
+          tabBarIcon: ({ color, size }) => <TrendingUp color={color} size={size} />,
+        }}
       />
       <Tabs.Screen
         name="birikimler"
-        options={{ title: 'Birikimler', tabBarIcon: ({ color, size }) => <HandCoins color={color} size={size} /> }}
+        options={{
+          title: 'Birikimler',
+          tabBarActiveTintColor: TAB_COLORS.savings,
+          tabBarIcon: ({ color, size }) => <HandCoins color={color} size={size} />,
+        }}
       />
       <Tabs.Screen
         name="analiz"
-        options={{ title: 'Analiz', tabBarIcon: ({ color, size }) => <BarChart3 color={color} size={size} /> }}
+        options={{
+          title: 'Analiz',
+          tabBarActiveTintColor: TAB_COLORS.analytics,
+          tabBarIcon: ({ color, size }) => <BarChart3 color={color} size={size} />,
+        }}
       />
       <Tabs.Screen
         name="recurring"
-        options={{ title: 'Düzenli', tabBarIcon: ({ color, size }) => <Repeat color={color} size={size} /> }}
+        options={{
+          title: 'Düzenli',
+          tabBarActiveTintColor: TAB_COLORS.recurring,
+          tabBarIcon: ({ color, size }) => <Repeat color={color} size={size} />,
+        }}
       />
     </Tabs>
   );

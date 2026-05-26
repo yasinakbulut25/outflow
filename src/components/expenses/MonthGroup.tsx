@@ -18,7 +18,7 @@ import { SavingsCard } from '@/components/savings/SavingsCard';
 import type { MonthGroup as MonthGroupModel } from '@/lib/groupExpenses';
 import type { Expense } from '@/types';
 
-const EMERALD = '#059669';
+const EMERALD = '#d97706';
 
 interface Props {
   group: MonthGroupModel;
