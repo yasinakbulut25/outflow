@@ -1,5 +1,6 @@
 import { forwardRef, useCallback, useImperativeHandle, useMemo, useRef, useState } from 'react';
 import { View, Pressable, Alert } from 'react-native';
+import { nanoid } from '@reduxjs/toolkit';
 import { BottomSheetModal, BottomSheetScrollView, BottomSheetBackdrop } from '@gorhom/bottom-sheet';
 import { DatePicker } from '@/components/ui/DatePicker';
 import { Plus, Trash2, X } from 'lucide-react-native';
@@ -40,8 +41,8 @@ interface ItemRow {
   amount: number;
 }
 
-let rowSeq = 0;
-const newRow = (name = '', amount = 0): ItemRow => ({ key: `r${rowSeq++}`, name, amount });
+// Çarpışma-proof anahtar: modül sayacı Fast Refresh'te sıfırlanıp çakışabiliyordu.
+const newRow = (name = '', amount = 0): ItemRow => ({ key: nanoid(), name, amount });
 
 function toISODate(d: Date): string {
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
@@ -63,7 +64,7 @@ export const ExpenseFormSheet = forwardRef<ExpenseFormSheetRef, ExpenseFormSheet
   const [categoryId, setCategoryId] = useState<number | undefined>(undefined);
   const [paymentType, setPaymentType] = useState<'cash' | 'installment'>('cash');
   const [installmentCount, setInstallmentCount] = useState(2);
-  const [items, setItems] = useState<ItemRow[]>([newRow()]);
+  const [items, setItems] = useState<ItemRow[]>(() => [newRow()]);
 
   const reset = useCallback((expense?: Expense) => {
     if (expense) {
@@ -99,7 +100,10 @@ export const ExpenseFormSheet = forwardRef<ExpenseFormSheetRef, ExpenseFormSheet
 
   const updateItem = (key: string, patch: Partial<ItemRow>) =>
     setItems((prev) => prev.map((it) => (it.key === key ? { ...it, ...patch } : it)));
-  const addItem = () => setItems((prev) => [...prev, newRow()]);
+  const addItem = () => {
+    const row = newRow();
+    setItems((prev) => [...prev, row]);
+  };
   const removeItem = (key: string) =>
     setItems((prev) => (prev.length > 1 ? prev.filter((it) => it.key !== key) : prev));
 
