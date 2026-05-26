@@ -4,9 +4,10 @@ import { FlashList } from '@shopify/flash-list';
 import { Wallet } from 'lucide-react-native';
 import { EmptyState } from '@/components/ui/EmptyState';
 import { SkeletonCard } from '@/components/ui/SkeletonCard';
-import { useGetExpensesQuery } from '@/store/api';
+import { useGetExpensesQuery, useGetRecurringQuery } from '@/store/api';
 import { usePeriod } from '@/hooks/usePeriod';
 import { groupExpensesByMonthAndDay } from '@/lib/groupExpenses';
+import { projectRecurring } from '@/lib/projectRecurring';
 import { PeriodBar } from './PeriodBar';
 import { MonthGroup } from './MonthGroup';
 import type { Expense } from '@/types';
@@ -19,14 +20,28 @@ export function ExpenseList({ onPressExpense }: { onPressExpense?: (e: Expense) 
     { year, month: month ?? undefined },
     { refetchOnMountOrArgChange: true },
   );
+  // Sadece "Tümü" görünümünde gelecek aylar için sanal planlanan kayıtlar üret.
+  const { data: templates } = useGetRecurringQuery(undefined, { skip: month != null });
 
-  const groups = useMemo(() => groupExpensesByMonthAndDay(data ?? []), [data]);
+  const groups = useMemo(() => {
+    const actual = data ?? [];
+    const merged = month == null ? [...actual, ...projectRecurring(templates ?? [], actual, year)] : actual;
+    return groupExpensesByMonthAndDay(merged);
+  }, [data, templates, month, year]);
+
+  // Açılışta cari ayı aç (yoksa en güncel grubu) — planlanan gelecek aylar değil.
+  const expandKey = useMemo(() => {
+    const now = new Date();
+    const todayKey = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+    if (groups.some((g) => g.monthKey === todayKey)) return todayKey;
+    return groups[0]?.monthKey;
+  }, [groups]);
 
   const renderItem = useCallback(
-    ({ item, index }: { item: (typeof groups)[number]; index: number }) => (
-      <MonthGroup group={item} defaultExpanded={index === 0} onPressExpense={onPressExpense} />
+    ({ item }: { item: (typeof groups)[number] }) => (
+      <MonthGroup group={item} defaultExpanded={item.monthKey === expandKey} onPressExpense={onPressExpense} />
     ),
-    [onPressExpense],
+    [onPressExpense, expandKey],
   );
 
   if (isLoading) {

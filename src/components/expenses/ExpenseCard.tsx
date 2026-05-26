@@ -3,6 +3,7 @@ import { Card } from '@/components/ui/Card';
 import { Text } from '@/components/ui/Text';
 import { Icon } from '@/components/ui/Icon';
 import { Badge } from '@/components/ui/Badge';
+import { cn } from '@/lib/cn';
 import { categoryIcon } from '@/lib/categoryIcons';
 import { displayAmount } from '@/lib/groupExpenses';
 import { formatCurrency } from '@/lib/formatters';
@@ -13,10 +14,15 @@ import type { Expense } from '@/types';
 export function ExpenseCard({ expense, onPress }: { expense: Expense; onPress?: (e: Expense) => void }) {
   const { Icon: CatIcon, color } = categoryIcon(expense.category_id);
   const isInstallment = expense.payment_type === 'installment';
+  const projected = expense.projected;
   const amount = displayAmount(expense);
 
   return (
-    <Pressable onPress={() => onPress?.(expense)} className="active:opacity-70">
+    <Pressable
+      onPress={projected ? undefined : () => onPress?.(expense)}
+      disabled={projected}
+      className={cn('active:opacity-70', projected && 'opacity-60')}
+    >
       <Card className="mb-2">
         <View className="flex-row items-center gap-3">
           <View
@@ -37,10 +43,14 @@ export function ExpenseCard({ expense, onPress }: { expense: Expense; onPress?: 
 
           <View className="items-end gap-1">
             <Text variant="mono">{formatCurrency(amount)} ₺</Text>
-            <Badge
-              label={isInstallment ? 'Taksit' : 'Peşin'}
-              tone={isInstallment ? 'installment' : 'cash'}
-            />
+            {projected ? (
+              <Badge label="Planlanan" tone="neutral" />
+            ) : (
+              <Badge
+                label={isInstallment ? 'Taksit' : 'Peşin'}
+                tone={isInstallment ? 'installment' : 'cash'}
+              />
+            )}
           </View>
         </View>
 

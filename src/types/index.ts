@@ -50,6 +50,8 @@ export interface Expense {
   installment_display_month?: string;
   installment_current_no?: number;
   recurring_template_id?: number;
+  /** Yalnız client: recurring şablonundan üretilen sanal (planlanan, DB'ye yazılmamış) kayıt. */
+  projected?: boolean;
 }
 
 export interface CreateExpensePayload {

@@ -12,9 +12,10 @@ export interface MonthGroup {
   year: number;
   month: number; // 1-12
   monthKey: string; // "2026-05"
-  totalAmount: number;
+  totalAmount: number; // yalnız gerçekleşen (planlanan hariç)
   cashAmount: number;
   installmentAmount: number;
+  projectedAmount: number; // planlanan (sanal düzenli ödeme) toplamı
   days: DayGroup[];
 }
 
@@ -44,17 +45,22 @@ export function groupExpensesByMonthAndDay(expenses: Expense[]): MonthGroup[] {
     if (!monthMap.has(monthKey)) {
       monthMap.set(monthKey, {
         year, month, monthKey,
-        totalAmount: 0, cashAmount: 0, installmentAmount: 0,
+        totalAmount: 0, cashAmount: 0, installmentAmount: 0, projectedAmount: 0,
         days: [],
       });
     }
 
     const monthGroup = monthMap.get(monthKey)!;
-    monthGroup.totalAmount += amount;
-    if (expense.payment_type === 'cash') {
-      monthGroup.cashAmount += amount;
+    if (expense.projected) {
+      // Planlanan kayıtlar gerçekleşen toplamlara katılmaz; ayrı izlenir.
+      monthGroup.projectedAmount += amount;
     } else {
-      monthGroup.installmentAmount += amount;
+      monthGroup.totalAmount += amount;
+      if (expense.payment_type === 'cash') {
+        monthGroup.cashAmount += amount;
+      } else {
+        monthGroup.installmentAmount += amount;
+      }
     }
 
     let dayGroup = monthGroup.days.find((d) => d.date === dateKey);

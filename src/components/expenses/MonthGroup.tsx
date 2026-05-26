@@ -40,16 +40,24 @@ export function MonthGroup({ group, defaultExpanded = false, onPressExpense }: P
       <Pressable onPress={toggle} className="flex-row items-center gap-3 p-4 active:opacity-70">
         <View className="flex-1">
           <Text variant="h2">{getMonthName(group.month)}</Text>
-          <View className="mt-0.5 flex-row gap-3">
+          <View className="mt-0.5 flex-row flex-wrap gap-x-3">
             {group.cashAmount > 0 ? (
               <Text variant="muted">Peşin {formatCurrency(group.cashAmount)} ₺</Text>
             ) : null}
             {group.installmentAmount > 0 ? (
               <Text variant="muted">Taksit {formatCurrency(group.installmentAmount)} ₺</Text>
             ) : null}
+            {group.projectedAmount > 0 ? (
+              <Text variant="muted">Planlanan {formatCurrency(group.projectedAmount)} ₺</Text>
+            ) : null}
           </View>
         </View>
-        <Text variant="mono" className="text-lg">{formatCurrency(group.totalAmount)} ₺</Text>
+        <View className="items-end">
+          <Text variant="mono" className="text-lg">{formatCurrency(group.totalAmount)} ₺</Text>
+          {group.totalAmount === 0 && group.projectedAmount > 0 ? (
+            <Text variant="muted" className="text-xs">planlanan</Text>
+          ) : null}
+        </View>
         <Animated.View style={chevronStyle}>
           <Icon icon={ChevronDown} size={20} color={colors.muted} />
         </Animated.View>
