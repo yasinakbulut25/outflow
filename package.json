@@ -47,6 +47,7 @@
     "eslint": "^9.0.0",
     "eslint-config-expo": "~56.0.4",
     "prettier-plugin-tailwindcss": "^0.8.0",
+    "sharp": "^0.34.5",
     "tailwindcss": "^3.4.19",
     "typescript": "~6.0.3"
   },
@@ -56,7 +57,10 @@
     "android": "expo start --android",
     "ios": "expo start --ios",
     "web": "expo start --web",
-    "lint": "expo lint"
+    "lint": "expo lint",
+    "build:preview": "eas build -p android --profile preview",
+    "build:prod": "eas build -p android --profile production",
+    "build:dev": "eas build -p android --profile development"
   },
   "private": true
 }
