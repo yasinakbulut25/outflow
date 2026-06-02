@@ -42,7 +42,10 @@ const baseQuery: BaseQueryFn<string | FetchArgs, unknown, FetchBaseQueryError> =
   const result = await rawBaseQuery(args, apiArg, extraOptions);
 
   if (result.error) {
-    if (result.error.status === 401) await clearToken();
+    if (result.error.status === 401) {
+      await clearToken();
+      apiArg.dispatch({ type: 'auth/logout' }); // AuthGuard → login redirect
+    }
     return result;
   }
 

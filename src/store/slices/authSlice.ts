@@ -33,7 +33,10 @@ export const signOut = createAsyncThunk('auth/signOut', async (_, { dispatch }) 
 const authSlice = createSlice({
   name: 'auth',
   initialState,
-  reducers: {},
+  reducers: {
+    // 401 auto-logout: api.ts tarafından dispatch edilir (circular import olmadan).
+    logout: (state) => { state.user = null; },
+  },
   extraReducers: (builder) => {
     builder
       .addCase(bootstrapAuth.fulfilled, (state, action) => {

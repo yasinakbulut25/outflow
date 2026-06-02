@@ -51,7 +51,7 @@ export function generateInstallmentSchedule(
   expenseDate: string,
   totalAmount: number,
   installmentCount: number
-): Array<{ date: string; amount: number; installmentNo: number }> {
+): { date: string; amount: number; installmentNo: number }[] {
   const monthlyAmount = calculateInstallmentAmount(totalAmount, installmentCount);
   const startDate = getInstallmentStartMonth(expenseDate);
   const schedule = [];
