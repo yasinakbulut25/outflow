@@ -1,56 +1,42 @@
-# Welcome to your Expo app 👋
+# Outflow
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+Personal finance tracker for iOS and Android. Full-stack personal project — REST API, MySQL schema, and React Native mobile app all built from scratch.
 
-## Get started
+## What's in this repo
 
-1. Install dependencies
+The mobile client. It connects to a REST API I built separately ([outflow-api](https://github.com/yasinakbulut/outflow-api)) backed by a MySQL database.
 
-   ```bash
-   npm install
-   ```
+**API & backend work covers:**
 
-2. Start the app
+- MySQL schema design — users, expenses, expense items (line items), recurring templates, incomes, categories
+- JWT authentication (register/login, token-based auth on all endpoints)
+- REST endpoints for full CRUD on expenses, recurring payments, incomes, and analytics aggregations
+- Business logic: installment spreading across months, recurring payment projection, category-level aggregation
 
-   ```bash
-   npx expo start
-   ```
+**Mobile client covers:**
 
-In the output, you'll find options to open the app in a
+- Full auth flow with secure token storage (expo-secure-store)
+- Expense list grouped by month/day with installment timelines
+- Add/edit/delete with multi-item support, installment count, and live total calculation
+- Recurring payment templates that project into future months without duplicating
+- Savings, income, and analytics screens
+- RTK Query for data fetching and cache invalidation
 
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
+## Features
 
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
+- **Expenses** — Single or multi-item, peşin or taksitli. Installments auto-appear in future months.
+- **Recurring payments** — Templates that project forward and never duplicate.
+- **Savings** — Separate tracking with quantity and optional TL value.
+- **Income** — One-time and recurring (e.g. salary).
+- **Analytics** — Monthly income/expense chart, category breakdown, net balance.
 
-## Get a fresh project
+## Stack
 
-When you're ready, run:
-
-```bash
-npm run reset-project
-```
-
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
-
-### Other setup steps
-
-- To set up ESLint for linting, run `npx expo lint`, or follow our guide on ["Using ESLint and Prettier"](https://docs.expo.dev/guides/using-eslint/)
-- If you'd like to set up unit testing, follow our guide on ["Unit Testing with Jest"](https://docs.expo.dev/develop/unit-testing/)
-- Learn more about the TypeScript setup in this template in our guide on ["Using TypeScript"](https://docs.expo.dev/guides/typescript/)
-
-## Learn more
-
-To learn more about developing your project with Expo, look at the following resources:
-
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
-
-## Join the community
-
-Join our community of developers creating universal apps.
-
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+|           |                                 |
+| --------- | ------------------------------- |
+| Framework | Expo SDK 56 · React Native 0.85 |
+| Routing   | expo-router                     |
+| Styling   | NativeWind v4                   |
+| State     | Redux Toolkit · RTK Query       |
+| Forms     | react-hook-form · zod           |
+| Build     | EAS Build                       |
