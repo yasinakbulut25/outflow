@@ -13,6 +13,7 @@ const config: ExpoConfig = {
     icon: './assets/images/icon.png',
     bundleIdentifier: 'com.outflow.app',
     supportsTablet: false,
+    usesAppleSignIn: true,
   },
   android: {
     package: 'com.outflow.app',
@@ -30,6 +31,7 @@ const config: ExpoConfig = {
   },
   plugins: [
     'expo-router',
+    'expo-apple-authentication',
     [
       'expo-splash-screen',
       {

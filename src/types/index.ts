@@ -8,8 +8,8 @@ export interface ApiResponse<T> {
 
 export interface User {
   id: number;
-  username: string;
-  display_name?: string;
+  email: string | null;
+  name?: string | null;
 }
 
 export interface AuthData {

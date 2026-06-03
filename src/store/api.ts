@@ -69,11 +69,17 @@ export const api = createApi({
   tagTypes: ['Category', 'Expense', 'Recurring', 'Income', 'RecurringIncome', 'Analytics'],
   endpoints: (build) => ({
     // --- Auth ---
-    login: build.mutation<AuthData, { username: string; password: string }>({
+    login: build.mutation<AuthData, { email: string; password: string }>({
       query: (body) => ({ url: '/auth/login', method: 'POST', body }),
     }),
-    register: build.mutation<AuthData, { username: string; password: string; display_name?: string }>({
+    register: build.mutation<AuthData, { email: string; password: string; name?: string }>({
       query: (body) => ({ url: '/auth/register', method: 'POST', body }),
+    }),
+    googleAuth: build.mutation<AuthData, { access_token: string }>({
+      query: (body) => ({ url: '/auth/google', method: 'POST', body }),
+    }),
+    appleAuth: build.mutation<AuthData, { identity_token: string; full_name?: { givenName?: string; familyName?: string } | null }>({
+      query: (body) => ({ url: '/auth/apple', method: 'POST', body }),
     }),
 
     // --- Categories ---
@@ -165,6 +171,8 @@ export const api = createApi({
 export const {
   useLoginMutation,
   useRegisterMutation,
+  useGoogleAuthMutation,
+  useAppleAuthMutation,
   useGetCategoriesQuery,
   useGetExpensesQuery,
   useCreateExpenseMutation,

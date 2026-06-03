@@ -16,8 +16,8 @@ import { getErrorMessage } from '@/lib/apiError';
 
 const schema = z
   .object({
-    display_name: z.string().trim().min(1, 'Ad gerekli'),
-    username: z.string().trim().min(3, 'En az 3 karakter'),
+    name: z.string().trim().min(1, 'Ad gerekli'),
+    email: z.string().trim().email('Geçerli bir e-posta gir'),
     password: z.string().min(6, 'En az 6 karakter'),
     confirm: z.string().min(1, 'Şifreyi tekrar gir'),
   })
@@ -33,15 +33,15 @@ export default function SignupScreen() {
   const [register, { isLoading }] = useRegisterMutation();
   const { control, handleSubmit, formState: { errors } } = useForm<FormValues>({
     resolver: zodResolver(schema),
-    defaultValues: { display_name: '', username: '', password: '', confirm: '' },
+    defaultValues: { name: '', email: '', password: '', confirm: '' },
   });
 
   const onSubmit = handleSubmit(async (values) => {
     try {
       const auth = await register({
-        username: values.username,
+        email: values.email,
         password: values.password,
-        display_name: values.display_name,
+        name: values.name,
       }).unwrap();
       await dispatch(signIn(auth)).unwrap();
       router.replace('/(tabs)');
@@ -60,14 +60,14 @@ export default function SignupScreen() {
       <View className="gap-4">
         <Controller
           control={control}
-          name="display_name"
+          name="name"
           render={({ field: { onChange, onBlur, value } }) => (
-            <Field label="Adın" error={errors.display_name?.message}>
+            <Field label="Adın" error={errors.name?.message}>
               <Input
                 value={value}
                 onChangeText={onChange}
                 onBlur={onBlur}
-                invalid={!!errors.display_name}
+                invalid={!!errors.name}
                 autoComplete="name"
                 placeholder="Adın"
                 returnKeyType="next"
@@ -77,18 +77,19 @@ export default function SignupScreen() {
         />
         <Controller
           control={control}
-          name="username"
+          name="email"
           render={({ field: { onChange, onBlur, value } }) => (
-            <Field label="Kullanıcı adı" error={errors.username?.message}>
+            <Field label="E-posta" error={errors.email?.message}>
               <Input
                 value={value}
                 onChangeText={onChange}
                 onBlur={onBlur}
-                invalid={!!errors.username}
+                invalid={!!errors.email}
                 autoCapitalize="none"
                 autoCorrect={false}
-                autoComplete="username-new"
-                placeholder="kullanici_adi"
+                autoComplete="email"
+                keyboardType="email-address"
+                placeholder="ornek@email.com"
                 returnKeyType="next"
               />
             </Field>
