@@ -11,11 +11,11 @@ const config: ExpoConfig = {
   userInterfaceStyle: 'automatic',
   ios: {
     icon: './assets/images/icon.png',
-    bundleIdentifier: 'com.yasinakbulut.outflow',
+    bundleIdentifier: 'com.outflow.app',
     supportsTablet: false,
   },
   android: {
-    package: 'com.yasinakbulut.outflow',
+    package: 'com.outflow.app',
     adaptiveIcon: {
       backgroundColor: '#E6F4FE',
       foregroundImage: './assets/images/android-icon-foreground.png',
