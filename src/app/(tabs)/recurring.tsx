@@ -11,12 +11,14 @@ import { ScreenHeader } from '@/components/ui/ScreenHeader';
 import { RecurringCard } from '@/components/recurring/RecurringCard';
 import { RecurringFormSheet, type RecurringFormSheetRef } from '@/components/recurring/RecurringFormSheet';
 import { useGetRecurringQuery } from '@/store/api';
+import { usePullToRefresh } from '@/hooks/usePullToRefresh';
 import { haptics } from '@/lib/haptics';
 import { colors } from '@/theme/tokens';
 
 export default function RecurringScreen() {
   const sheetRef = useRef<RecurringFormSheetRef>(null);
-  const { data, isLoading, isError, isFetching, refetch } = useGetRecurringQuery();
+  const { data, isLoading, isError, refetch } = useGetRecurringQuery();
+  const { refreshing, onRefresh } = usePullToRefresh(refetch);
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: colors.background }} edges={['top']}>
@@ -44,8 +46,8 @@ export default function RecurringScreen() {
               <EmptyState message="Henüz düzenli ödeme yok." icon={Repeat} />
             )
           }
-          refreshing={isFetching}
-          onRefresh={refetch}
+          refreshing={refreshing}
+          onRefresh={onRefresh}
         />
       )}
 

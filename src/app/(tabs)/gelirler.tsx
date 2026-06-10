@@ -14,6 +14,8 @@ import { IncomeCard } from '@/components/income/IncomeCard';
 import { IncomeFormSheet, type IncomeFormSheetRef } from '@/components/income/IncomeFormSheet';
 import { useGetIncomesQuery, useGetRecurringIncomesQuery } from '@/store/api';
 import { usePeriod } from '@/hooks/usePeriod';
+import { useStableData } from '@/hooks/useStableData';
+import { usePullToRefresh } from '@/hooks/usePullToRefresh';
 import { haptics } from '@/lib/haptics';
 import { formatCurrency } from '@/lib/formatters';
 import { colors } from '@/theme/tokens';
@@ -32,7 +34,9 @@ export default function IncomeScreen() {
   // Düzenli gelir occurrence'ına dokununca şablonu açabilmek için şablon listesi.
   const templates = useGetRecurringIncomesQuery();
 
-  const list = incomes.data ?? [];
+  // Dönem değişiminde önceki veriyi koru → liste iskelete çökmez, layout zıplamaz.
+  const incomesData = useStableData(incomes.data);
+  const list = incomesData ?? [];
   const total = useMemo(() => list.reduce((sum, i) => sum + i.amount, 0), [list]);
 
   const onPressIncome = (income: Income) => {
@@ -44,14 +48,13 @@ export default function IncomeScreen() {
     }
   };
 
-  const onRefresh = () => {
-    incomes.refetch();
-    templates.refetch();
-  };
+  const { refreshing, onRefresh } = usePullToRefresh(() =>
+    Promise.all([incomes.refetch(), templates.refetch()]),
+  );
 
   return (
     <View className="flex-1">
-      <Screen scroll refreshing={incomes.isFetching || templates.isFetching} onRefresh={onRefresh}>
+      <Screen scroll refreshing={refreshing} onRefresh={onRefresh}>
         <ScreenHeader title="Gelirler" description="Tekrarlayan ve tek seferlik gelirlerini yönet." right={<YearStepper />} />
 
         <View className="mb-4 rounded-2xl p-4" style={{ backgroundColor: TEAL }}>
@@ -65,7 +68,7 @@ export default function IncomeScreen() {
         <PeriodBar />
 
         <View className="mt-3">
-          {incomes.isLoading ? (
+          {incomesData === undefined ? (
             <>
               <SkeletonCard />
               <SkeletonCard />

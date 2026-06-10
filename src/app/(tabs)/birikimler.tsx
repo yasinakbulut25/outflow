@@ -10,6 +10,8 @@ import { Icon } from "@/components/ui/Icon";
 import { ScreenHeader } from "@/components/ui/ScreenHeader";
 import { YearStepper } from "@/components/ui/YearStepper";
 import { SkeletonCard } from "@/components/ui/SkeletonCard";
+import { useStableData } from "@/hooks/useStableData";
+import { usePullToRefresh } from "@/hooks/usePullToRefresh";
 import { Text } from "@/components/ui/Text";
 import { usePeriod } from "@/hooks/usePeriod";
 import { BIRIKIM_CATEGORY_ID } from "@/lib/categoryIcons";
@@ -29,10 +31,13 @@ const GOLD = '#d97706'; // birikim teması (altın)
 export default function SavingsScreen() {
   const sheetRef = useRef<SavingsFormSheetRef>(null);
   const { year, month } = usePeriod();
-  const { data, isLoading, isError, isFetching, refetch } = useGetExpensesQuery(
+  const { data: raw, isError, refetch } = useGetExpensesQuery(
     { year, month: month ?? undefined },
     { refetchOnMountOrArgChange: true },
   );
+  // Dönem değişiminde önceki veriyi koru → layout zıplamaz.
+  const data = useStableData(raw);
+  const { refreshing, onRefresh } = usePullToRefresh(refetch);
 
   const savings = useMemo(
     () =>
@@ -76,7 +81,7 @@ export default function SavingsScreen() {
       style={{ flex: 1, backgroundColor: colors.background }}
       edges={["top"]}
     >
-      {isLoading ? (
+      {data === undefined ? (
         <View className="flex-1 px-4 pt-4">
           {Array.from({ length: 4 }, (_, i) => (
             <SkeletonCard key={i} />
@@ -105,8 +110,8 @@ export default function SavingsScreen() {
               <EmptyState message="Bu dönemde birikim yok." icon={HandCoins} />
             )
           }
-          refreshing={isFetching}
-          onRefresh={refetch}
+          refreshing={refreshing}
+          onRefresh={onRefresh}
         />
       )}
 

@@ -10,6 +10,8 @@ import { YearStepper } from '@/components/ui/YearStepper';
 import { useGetExpensesQuery } from '@/store/api';
 import { usePeriod } from '@/hooks/usePeriod';
 import { groupExpensesByMonthAndDay } from '@/lib/groupExpenses';
+import { useStableData } from '@/hooks/useStableData';
+import { usePullToRefresh } from '@/hooks/usePullToRefresh';
 import { PeriodBar } from './PeriodBar';
 import { MonthGroup } from './MonthGroup';
 import type { Expense } from '@/types';
@@ -26,10 +28,13 @@ export function ExpenseList({
   const { year, month } = usePeriod();
   // Tekrarlayan ödemeler artık backend'de şablondan türetiliyor (projected:true ile);
   // hem ay hem "Tümü" görünümünde API verisi doğrudan kullanılır.
-  const { data, isLoading, isError, isFetching, refetch } = useGetExpensesQuery(
+  const { data: raw, isError, refetch } = useGetExpensesQuery(
     { year, month: month ?? undefined },
     { refetchOnMountOrArgChange: true },
   );
+  // Dönem değişiminde önceki veriyi koru → liste iskelete çökmez, layout zıplamaz.
+  const data = useStableData(raw);
+  const { refreshing, onRefresh } = usePullToRefresh(refetch);
 
   const groups = useMemo(() => groupExpensesByMonthAndDay(data ?? []), [data]);
 
@@ -65,7 +70,7 @@ export function ExpenseList({
     </>
   );
 
-  if (isLoading) {
+  if (data === undefined) {
     return (
       <View className="flex-1 px-4 pt-4">
         {listHeader}
@@ -90,7 +95,7 @@ export function ExpenseList({
           <EmptyState message="Bu dönemde harcama yok." icon={Wallet} />
         )
       }
-      refreshControl={<RefreshControl refreshing={isFetching} onRefresh={refetch} />}
+      refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
     />
   );
 }

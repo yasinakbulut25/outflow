@@ -16,6 +16,8 @@ import { CategoryBreakdown } from '@/components/analytics/CategoryBreakdown';
 import { NetList } from '@/components/analytics/NetList';
 import { useGetAnalyticsQuery } from '@/store/api';
 import { usePeriod } from '@/hooks/usePeriod';
+import { useStableData } from '@/hooks/useStableData';
+import { usePullToRefresh } from '@/hooks/usePullToRefresh';
 import { colors } from '@/theme/tokens';
 
 function Section({ title, icon, children }: { title: string; icon: IconComponent; children: ReactNode }) {
@@ -32,9 +34,12 @@ function Section({ title, icon, children }: { title: string; icon: IconComponent
 
 export default function AnalyticsScreen() {
   const { year } = usePeriod();
-  const { data, isLoading, isError, isFetching, refetch } = useGetAnalyticsQuery(year, {
+  const { data: raw, isError, refetch } = useGetAnalyticsQuery(year, {
     refetchOnMountOrArgChange: true,
   });
+  // Yıl değişiminde önceki veriyi koru → layout zıplamaz.
+  const data = useStableData(raw);
+  const { refreshing, onRefresh } = usePullToRefresh(refetch);
 
   const hasData =
     !!data &&
@@ -43,14 +48,14 @@ export default function AnalyticsScreen() {
       data.category_totals.length > 0);
 
   return (
-    <Screen scroll refreshing={isFetching} onRefresh={refetch}>
+    <Screen scroll refreshing={refreshing} onRefresh={onRefresh}>
       <ScreenHeader
         title="Analiz"
         description="Yıllık gelir, gider ve kategori dağılımının özeti."
         right={<YearStepper />}
       />
 
-      {isLoading ? (
+      {data === undefined ? (
         <View>
           <SkeletonCard />
           <SkeletonCard />
