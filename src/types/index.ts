@@ -103,6 +103,8 @@ export interface Income {
   recurring_income_id?: number;
   created_at: string;
   updated_at: string;
+  // Şablondan okuma anında türetilmiş sanal occurrence (DB'de satır yok, düzenlenemez)
+  projected?: boolean;
 }
 
 export interface CreateIncomePayload {

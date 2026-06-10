@@ -1,30 +1,30 @@
-import { useForm, Controller } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { z } from 'zod';
-import { View, TouchableOpacity } from 'react-native';
-import { Link, useRouter } from 'expo-router';
-import * as WebBrowser from 'expo-web-browser';
-import * as Google from 'expo-auth-session/providers/google';
-import { useEffect } from 'react';
-import AppleSignInButton from '@/components/AppleSignInButton';
-import { Screen } from '@/components/ui/Screen';
-import { Text } from '@/components/ui/Text';
-import { Field } from '@/components/ui/Field';
-import { Input } from '@/components/ui/Input';
-import { Button } from '@/components/ui/Button';
-import { useLoginMutation, useGoogleAuthMutation } from '@/store/api';
-import { useAppDispatch } from '@/store/hooks';
-import { signIn } from '@/store/slices/authSlice';
-import { addToast } from '@/store/slices/uiSlice';
-import { getErrorMessage } from '@/lib/apiError';
-import { GOOGLE_IOS_CLIENT_ID, GOOGLE_ANDROID_CLIENT_ID } from '@/lib/config';
-import type { AuthData } from '@/types';
+import AppleSignInButton from "@/components/AppleSignInButton";
+import { Button } from "@/components/ui/Button";
+import { Field } from "@/components/ui/Field";
+import { Input } from "@/components/ui/Input";
+import { Screen } from "@/components/ui/Screen";
+import { Text } from "@/components/ui/Text";
+import { getErrorMessage } from "@/lib/apiError";
+import { GOOGLE_ANDROID_CLIENT_ID, GOOGLE_IOS_CLIENT_ID } from "@/lib/config";
+import { useGoogleAuthMutation, useLoginMutation } from "@/store/api";
+import { useAppDispatch } from "@/store/hooks";
+import { signIn } from "@/store/slices/authSlice";
+import { addToast } from "@/store/slices/uiSlice";
+import type { AuthData } from "@/types";
+import { zodResolver } from "@hookform/resolvers/zod";
+import * as Google from "expo-auth-session/providers/google";
+import { Link, useRouter } from "expo-router";
+import * as WebBrowser from "expo-web-browser";
+import { useEffect } from "react";
+import { Controller, useForm } from "react-hook-form";
+import { TouchableOpacity, View } from "react-native";
+import { z } from "zod";
 
 WebBrowser.maybeCompleteAuthSession();
 
 const schema = z.object({
-  email: z.string().trim().email('Geçerli bir e-posta gir'),
-  password: z.string().min(1, 'Şifre gerekli'),
+  email: z.string().trim().email("Geçerli bir e-posta gir"),
+  password: z.string().min(1, "Şifre gerekli"),
 });
 type FormValues = z.infer<typeof schema>;
 
@@ -34,9 +34,13 @@ export default function LoginScreen() {
   const [login, { isLoading }] = useLoginMutation();
   const [googleAuth, { isLoading: googleLoading }] = useGoogleAuthMutation();
 
-  const { control, handleSubmit, formState: { errors } } = useForm<FormValues>({
+  const {
+    control,
+    handleSubmit,
+    formState: { errors },
+  } = useForm<FormValues>({
     resolver: zodResolver(schema),
-    defaultValues: { email: '', password: '' },
+    defaultValues: { email: "", password: "" },
   });
 
   const [, googleResponse, googlePromptAsync] = Google.useAuthRequest({
@@ -45,7 +49,7 @@ export default function LoginScreen() {
   });
 
   useEffect(() => {
-    if (googleResponse?.type !== 'success') return;
+    if (googleResponse?.type !== "success") return;
     const accessToken = googleResponse.authentication?.accessToken;
     if (!accessToken) return;
     void (async () => {
@@ -53,14 +57,16 @@ export default function LoginScreen() {
         const auth = await googleAuth({ access_token: accessToken }).unwrap();
         await finishSignIn(auth);
       } catch (err) {
-        dispatch(addToast(getErrorMessage(err, 'Google ile giriş başarısız'), 'error'));
+        dispatch(
+          addToast(getErrorMessage(err, "Google ile giriş başarısız"), "error"),
+        );
       }
     })();
   }, [googleResponse]);
 
   async function finishSignIn(auth: AuthData) {
     await dispatch(signIn(auth)).unwrap();
-    router.replace('/(tabs)');
+    router.replace("/(tabs)");
   }
 
   const onSubmit = handleSubmit(async (values) => {
@@ -68,7 +74,7 @@ export default function LoginScreen() {
       const auth = await login(values).unwrap();
       await finishSignIn(auth);
     } catch (err) {
-      dispatch(addToast(getErrorMessage(err, 'Giriş başarısız'), 'error'));
+      dispatch(addToast(getErrorMessage(err, "Giriş başarısız"), "error"));
     }
   });
 
@@ -84,7 +90,7 @@ export default function LoginScreen() {
           control={control}
           name="email"
           render={({ field: { onChange, onBlur, value } }) => (
-            <Field label="E-posta" error={errors.email?.message}>
+            <Field label="E-posta ad" error={errors.email?.message}>
               <Input
                 value={value}
                 onChangeText={onChange}
@@ -125,7 +131,9 @@ export default function LoginScreen() {
 
       <View className="flex-row items-center gap-3">
         <View className="flex-1 h-px bg-border" />
-        <Text variant="muted" className="text-xs">veya</Text>
+        <Text variant="muted" className="text-xs">
+          veya
+        </Text>
         <View className="flex-1 h-px bg-border" />
       </View>
 

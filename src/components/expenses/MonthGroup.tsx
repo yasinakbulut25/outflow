@@ -26,10 +26,11 @@ interface Props {
   defaultExpanded?: boolean;
   onPressExpense?: (e: Expense) => void;
   onPressSaving?: (e: Expense) => void;
+  onPressRecurring?: (templateId: number) => void;
 }
 
 // Ay içindeki düzenli ödemeleri tek satıra toplayan katlanabilir bölüm.
-function RecurringSection({ group, onPressExpense }: { group: MonthGroupModel; onPressExpense?: (e: Expense) => void }) {
+function RecurringSection({ group, onPressRecurring }: { group: MonthGroupModel; onPressRecurring?: (templateId: number) => void }) {
   const [open, setOpen] = useState(false);
   const rotation = useSharedValue(0);
 
@@ -59,7 +60,11 @@ function RecurringSection({ group, onPressExpense }: { group: MonthGroupModel; o
       {open ? (
         <Animated.View entering={FadeIn.duration(150)} className="px-3 pb-2 pt-1">
           {group.recurring.map((e) => (
-            <ExpenseCard key={e.id} expense={e} onPress={onPressExpense} />
+            <ExpenseCard
+              key={e.id}
+              expense={e}
+              onPress={(ex) => ex.recurring_template_id && onPressRecurring?.(ex.recurring_template_id)}
+            />
           ))}
         </Animated.View>
       ) : null}
@@ -107,7 +112,7 @@ function SavingsSection({ group, onPressSaving }: { group: MonthGroupModel; onPr
   );
 }
 
-export function MonthGroup({ group, defaultExpanded = false, onPressExpense, onPressSaving }: Props) {
+export function MonthGroup({ group, defaultExpanded = false, onPressExpense, onPressSaving, onPressRecurring }: Props) {
   const [expanded, setExpanded] = useState(defaultExpanded);
   const rotation = useSharedValue(defaultExpanded ? 180 : 0);
 
@@ -152,7 +157,7 @@ export function MonthGroup({ group, defaultExpanded = false, onPressExpense, onP
             <DayGroup key={day.date} day={day} onPressExpense={onPressExpense} />
           ))}
           {group.recurring.length > 0 ? (
-            <RecurringSection group={group} onPressExpense={onPressExpense} />
+            <RecurringSection group={group} onPressRecurring={onPressRecurring} />
           ) : null}
           {group.savings.length > 0 ? (
             <SavingsSection group={group} onPressSaving={onPressSaving} />

@@ -7,10 +7,9 @@ import { ErrorState } from '@/components/ui/ErrorState';
 import { SkeletonCard } from '@/components/ui/SkeletonCard';
 import { ScreenHeader } from '@/components/ui/ScreenHeader';
 import { YearStepper } from '@/components/ui/YearStepper';
-import { useGetExpensesQuery, useGetRecurringQuery } from '@/store/api';
+import { useGetExpensesQuery } from '@/store/api';
 import { usePeriod } from '@/hooks/usePeriod';
 import { groupExpensesByMonthAndDay } from '@/lib/groupExpenses';
-import { projectRecurring } from '@/lib/projectRecurring';
 import { PeriodBar } from './PeriodBar';
 import { MonthGroup } from './MonthGroup';
 import type { Expense } from '@/types';
@@ -18,25 +17,21 @@ import type { Expense } from '@/types';
 export function ExpenseList({
   onPressExpense,
   onPressSaving,
+  onPressRecurring,
 }: {
   onPressExpense?: (e: Expense) => void;
   onPressSaving?: (e: Expense) => void;
+  onPressRecurring?: (templateId: number) => void;
 }) {
   const { year, month } = usePeriod();
-  // Backend materyalizasyonu GET'in yan etkisi ve bakılan aya bağlı; dönem değişince
-  // taze veri çek ki "Tümü" görünümü ay gezinmesinin ürettiği satırları yansıtsın.
+  // Tekrarlayan ödemeler artık backend'de şablondan türetiliyor (projected:true ile);
+  // hem ay hem "Tümü" görünümünde API verisi doğrudan kullanılır.
   const { data, isLoading, isError, isFetching, refetch } = useGetExpensesQuery(
     { year, month: month ?? undefined },
     { refetchOnMountOrArgChange: true },
   );
-  // Sadece "Tümü" görünümünde gelecek aylar için sanal planlanan kayıtlar üret.
-  const { data: templates } = useGetRecurringQuery(undefined, { skip: month != null });
 
-  const groups = useMemo(() => {
-    const actual = data ?? [];
-    const merged = month == null ? [...actual, ...projectRecurring(templates ?? [], actual, year)] : actual;
-    return groupExpensesByMonthAndDay(merged);
-  }, [data, templates, month, year]);
+  const groups = useMemo(() => groupExpensesByMonthAndDay(data ?? []), [data]);
 
   // Açılışta cari ayı aç (yoksa en güncel grubu) — planlanan gelecek aylar değil.
   const expandKey = useMemo(() => {
@@ -53,9 +48,10 @@ export function ExpenseList({
         defaultExpanded={item.monthKey === expandKey}
         onPressExpense={onPressExpense}
         onPressSaving={onPressSaving}
+        onPressRecurring={onPressRecurring}
       />
     ),
-    [onPressExpense, onPressSaving, expandKey],
+    [onPressExpense, onPressSaving, onPressRecurring, expandKey],
   );
 
   const listHeader = (

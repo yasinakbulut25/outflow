@@ -5,19 +5,28 @@ import { Plus } from 'lucide-react-native';
 import { ExpenseList } from '@/components/expenses/ExpenseList';
 import { ExpenseFormSheet, type ExpenseFormSheetRef } from '@/components/expenses/ExpenseFormSheet';
 import { SavingsFormSheet, type SavingsFormSheetRef } from '@/components/savings/SavingsFormSheet';
+import { RecurringFormSheet, type RecurringFormSheetRef } from '@/components/recurring/RecurringFormSheet';
 import { Icon } from '@/components/ui/Icon';
+import { useGetRecurringQuery } from '@/store/api';
 import { haptics } from '@/lib/haptics';
 import { colors } from '@/theme/tokens';
 
 export default function ExpensesScreen() {
   const sheetRef = useRef<ExpenseFormSheetRef>(null);
   const savingsSheet = useRef<SavingsFormSheetRef>(null);
+  const recurringSheet = useRef<RecurringFormSheetRef>(null);
+  // Düzenli ödeme occurrence'ına dokununca şablonu açabilmek için şablon listesi.
+  const { data: templates } = useGetRecurringQuery();
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: colors.background }} edges={['top']}>
       <ExpenseList
         onPressExpense={(e) => sheetRef.current?.present(e)}
         onPressSaving={(e) => savingsSheet.current?.present(e)}
+        onPressRecurring={(id) => {
+          const tpl = templates?.find((t) => t.id === id);
+          if (tpl) recurringSheet.current?.present(tpl);
+        }}
       />
 
       <Pressable
@@ -41,6 +50,7 @@ export default function ExpensesScreen() {
 
       <ExpenseFormSheet ref={sheetRef} />
       <SavingsFormSheet ref={savingsSheet} />
+      <RecurringFormSheet ref={recurringSheet} />
     </SafeAreaView>
   );
 }

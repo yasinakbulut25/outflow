@@ -11,7 +11,7 @@ const config: ExpoConfig = {
   userInterfaceStyle: 'automatic',
   ios: {
     icon: './assets/images/icon.png',
-    bundleIdentifier: 'com.outflow.app',
+    bundleIdentifier: 'com.yasinakbulut.outflow',
     supportsTablet: false,
     usesAppleSignIn: true,
   },
@@ -31,6 +31,7 @@ const config: ExpoConfig = {
   },
   plugins: [
     'expo-router',
+    'expo-image',
     'expo-apple-authentication',
     [
       'expo-splash-screen',
