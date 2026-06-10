@@ -147,6 +147,7 @@ export const RecurringFormSheet = forwardRef<RecurringFormSheetRef>((_props, ref
       snapPoints={['85%']}
       enablePanDownToClose
       keyboardBehavior="interactive"
+      keyboardBlurBehavior="restore"
       android_keyboardInputMode="adjustResize"
       backgroundStyle={{ backgroundColor: colors.background }}
       handleIndicatorStyle={{ backgroundColor: colors.border }}
@@ -161,7 +162,7 @@ export const RecurringFormSheet = forwardRef<RecurringFormSheetRef>((_props, ref
         </View>
 
         <Field label="Başlık">
-          <Input value={title} onChangeText={setTitle} placeholder="Örn. Netflix aboneliği" />
+          <Input bottomSheet value={title} onChangeText={setTitle} placeholder="Örn. Netflix aboneliği" />
         </Field>
 
         <Field label="Tutar">

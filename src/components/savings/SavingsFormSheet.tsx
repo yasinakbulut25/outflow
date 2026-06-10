@@ -134,6 +134,7 @@ export const SavingsFormSheet = forwardRef<SavingsFormSheetRef>((_props, ref) =>
       snapPoints={['70%']}
       enablePanDownToClose
       keyboardBehavior="interactive"
+      keyboardBlurBehavior="restore"
       android_keyboardInputMode="adjustResize"
       backgroundStyle={{ backgroundColor: colors.background }}
       handleIndicatorStyle={{ backgroundColor: colors.border }}
@@ -148,11 +149,11 @@ export const SavingsFormSheet = forwardRef<SavingsFormSheetRef>((_props, ref) =>
         </View>
 
         <Field label="Ne biriktirdin?">
-          <Input value={title} onChangeText={setTitle} placeholder="Örn. Altın, Dolar, Nakit" />
+          <Input bottomSheet value={title} onChangeText={setTitle} placeholder="Örn. Altın, Dolar, Nakit" />
         </Field>
 
         <Field label="Ne kadar?">
-          <Input value={quantity} onChangeText={setQuantity} placeholder="Örn. 1500, 40 gr" />
+          <Input bottomSheet value={quantity} onChangeText={setQuantity} placeholder="Örn. 1500, 40 gr" />
         </Field>
 
         <Field label="Yaklaşık değer (₺) — opsiyonel">

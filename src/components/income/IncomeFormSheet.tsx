@@ -181,6 +181,7 @@ export const IncomeFormSheet = forwardRef<IncomeFormSheetRef>((_props, ref) => {
       snapPoints={['85%']}
       enablePanDownToClose
       keyboardBehavior="interactive"
+      keyboardBlurBehavior="restore"
       android_keyboardInputMode="adjustResize"
       backgroundStyle={{ backgroundColor: colors.background }}
       handleIndicatorStyle={{ backgroundColor: colors.border }}
@@ -195,7 +196,7 @@ export const IncomeFormSheet = forwardRef<IncomeFormSheetRef>((_props, ref) => {
         </View>
 
         <Field label="Başlık">
-          <Input value={title} onChangeText={setTitle} placeholder={repeat ? 'Örn. Maaş' : 'Örn. Ek iş ödemesi'} />
+          <Input bottomSheet value={title} onChangeText={setTitle} placeholder={repeat ? 'Örn. Maaş' : 'Örn. Ek iş ödemesi'} />
         </Field>
 
         <Field label="Tutar">
@@ -283,7 +284,7 @@ export const IncomeFormSheet = forwardRef<IncomeFormSheetRef>((_props, ref) => {
         />
 
         <Field label="Not (opsiyonel)">
-          <Input value={note} onChangeText={setNote} placeholder="Açıklama" />
+          <Input bottomSheet value={note} onChangeText={setNote} placeholder="Açıklama" />
         </Field>
 
         {editTpl ? (

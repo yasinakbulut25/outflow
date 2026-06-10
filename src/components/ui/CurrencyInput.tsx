@@ -1,7 +1,7 @@
 import { useState } from 'react';
-import { TextInput } from 'react-native';
 import { cn } from '@/lib/cn';
 import { colors } from '@/theme/tokens';
+import { SheetTextInput } from '@/components/ui/SheetTextInput';
 
 // Tutar girişi: yazılan sayı doğrudan değerdir. "999" → 999, "1200" → 1.200 (=1200 TL).
 // Opsiyonel virgülle kuruş: "1234,5" → 1234,5. Gösterimde binlik ayırıcı eklenir.
@@ -61,7 +61,7 @@ export function CurrencyInput({ value, onChangeValue, invalid, className }: Curr
   }
 
   return (
-    <TextInput
+    <SheetTextInput
       value={display(text)}
       onChangeText={handleChange}
       keyboardType="decimal-pad"

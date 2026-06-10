@@ -39,6 +39,10 @@ function IosDatePicker({ value, onConfirm, onClose }: Omit<DatePickerProps, 'vis
             value={temp}
             mode="date"
             display="spinner"
+            // Modal arka planı beyaz; cihaz karanlık modda olsa bile picker'ı açık
+            // temaya zorla ve metin rengini koyu ver (yoksa beyaz-üstüne-beyaz olur).
+            themeVariant="light"
+            textColor={colors.foreground}
             onChange={(_e, d) => {
               if (d) setTemp(d);
             }}
