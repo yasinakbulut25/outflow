@@ -8,12 +8,12 @@ import { EmptyState } from "@/components/ui/EmptyState";
 import { ErrorState } from "@/components/ui/ErrorState";
 import { Icon } from "@/components/ui/Icon";
 import { ScreenHeader } from "@/components/ui/ScreenHeader";
-import { YearStepper } from "@/components/ui/YearStepper";
 import { SkeletonCard } from "@/components/ui/SkeletonCard";
-import { useStableData } from "@/hooks/useStableData";
-import { usePullToRefresh } from "@/hooks/usePullToRefresh";
 import { Text } from "@/components/ui/Text";
+import { YearStepper } from "@/components/ui/YearStepper";
 import { usePeriod } from "@/hooks/usePeriod";
+import { usePullToRefresh } from "@/hooks/usePullToRefresh";
+import { useStableData } from "@/hooks/useStableData";
 import { BIRIKIM_CATEGORY_ID } from "@/lib/categoryIcons";
 import { formatCurrency } from "@/lib/formatters";
 import { displayAmount } from "@/lib/groupExpenses";
@@ -26,12 +26,16 @@ import { useMemo, useRef } from "react";
 import { Pressable, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
-const GOLD = '#d97706'; // birikim teması (altın)
+const GOLD = "#d97706"; // birikim teması (altın)
 
 export default function SavingsScreen() {
   const sheetRef = useRef<SavingsFormSheetRef>(null);
   const { year, month } = usePeriod();
-  const { data: raw, isError, refetch } = useGetExpensesQuery(
+  const {
+    data: raw,
+    isError,
+    refetch,
+  } = useGetExpensesQuery(
     { year, month: month ?? undefined },
     { refetchOnMountOrArgChange: true },
   );
@@ -107,7 +111,11 @@ export default function SavingsScreen() {
             isError && !savings.length ? (
               <ErrorState onRetry={refetch} />
             ) : (
-              <EmptyState message="Bu dönemde birikim yok." icon={HandCoins} />
+              <EmptyState
+                message="Bu dönemde birikim yok"
+                description="Altın, dolar, nakit gibi biriktirdiklerini ekleyebilirsin."
+                icon={HandCoins}
+              />
             )
           }
           refreshing={refreshing}

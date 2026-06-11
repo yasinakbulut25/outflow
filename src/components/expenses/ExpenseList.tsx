@@ -1,20 +1,20 @@
-import { useCallback, useMemo } from 'react';
-import { View, RefreshControl } from 'react-native';
-import { FlashList } from '@shopify/flash-list';
-import { Wallet } from 'lucide-react-native';
-import { EmptyState } from '@/components/ui/EmptyState';
-import { ErrorState } from '@/components/ui/ErrorState';
-import { SkeletonCard } from '@/components/ui/SkeletonCard';
-import { ScreenHeader } from '@/components/ui/ScreenHeader';
-import { YearStepper } from '@/components/ui/YearStepper';
-import { useGetExpensesQuery } from '@/store/api';
-import { usePeriod } from '@/hooks/usePeriod';
-import { groupExpensesByMonthAndDay } from '@/lib/groupExpenses';
-import { useStableData } from '@/hooks/useStableData';
-import { usePullToRefresh } from '@/hooks/usePullToRefresh';
-import { PeriodBar } from './PeriodBar';
-import { MonthGroup } from './MonthGroup';
-import type { Expense } from '@/types';
+import { EmptyState } from "@/components/ui/EmptyState";
+import { ErrorState } from "@/components/ui/ErrorState";
+import { ScreenHeader } from "@/components/ui/ScreenHeader";
+import { SkeletonCard } from "@/components/ui/SkeletonCard";
+import { YearStepper } from "@/components/ui/YearStepper";
+import { usePeriod } from "@/hooks/usePeriod";
+import { usePullToRefresh } from "@/hooks/usePullToRefresh";
+import { useStableData } from "@/hooks/useStableData";
+import { groupExpensesByMonthAndDay } from "@/lib/groupExpenses";
+import { useGetExpensesQuery } from "@/store/api";
+import type { Expense } from "@/types";
+import { FlashList } from "@shopify/flash-list";
+import { Wallet } from "lucide-react-native";
+import { useCallback, useMemo } from "react";
+import { RefreshControl, View } from "react-native";
+import { MonthGroup } from "./MonthGroup";
+import { PeriodBar } from "./PeriodBar";
 
 export function ExpenseList({
   onPressExpense,
@@ -28,7 +28,11 @@ export function ExpenseList({
   const { year, month } = usePeriod();
   // Tekrarlayan ödemeler artık backend'de şablondan türetiliyor (projected:true ile);
   // hem ay hem "Tümü" görünümünde API verisi doğrudan kullanılır.
-  const { data: raw, isError, refetch } = useGetExpensesQuery(
+  const {
+    data: raw,
+    isError,
+    refetch,
+  } = useGetExpensesQuery(
     { year, month: month ?? undefined },
     { refetchOnMountOrArgChange: true },
   );
@@ -41,7 +45,7 @@ export function ExpenseList({
   // Açılışta cari ayı aç (yoksa en güncel grubu) — planlanan gelecek aylar değil.
   const expandKey = useMemo(() => {
     const now = new Date();
-    const todayKey = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+    const todayKey = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`;
     if (groups.some((g) => g.monthKey === todayKey)) return todayKey;
     return groups[0]?.monthKey;
   }, [groups]);
@@ -86,16 +90,26 @@ export function ExpenseList({
       data={groups}
       keyExtractor={(g) => g.monthKey}
       renderItem={renderItem}
-      contentContainerStyle={{ paddingHorizontal: 16, paddingTop: 16, paddingBottom: 24 }}
+      contentContainerStyle={{
+        paddingHorizontal: 16,
+        paddingTop: 16,
+        paddingBottom: 24,
+      }}
       ListHeaderComponent={listHeader}
       ListEmptyComponent={
         isError && !groups.length ? (
           <ErrorState onRetry={refetch} />
         ) : (
-          <EmptyState message="Bu dönemde harcama yok." icon={Wallet} />
+          <EmptyState
+            message="Bu dönemde harcama yok"
+            description="Peşin ya da taksitli harcamalarını ekleyerek dönemsel takip etmeye başla."
+            icon={Wallet}
+          />
         )
       }
-      refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
+      refreshControl={
+        <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+      }
     />
   );
 }

@@ -1,26 +1,34 @@
-import type { ReactNode } from 'react';
-import { View } from 'react-native';
-import { BarChart3, PieChart, Scale } from 'lucide-react-native';
-import { Screen } from '@/components/ui/Screen';
-import { Text } from '@/components/ui/Text';
-import { Icon, type IconComponent } from '@/components/ui/Icon';
-import { Card } from '@/components/ui/Card';
-import { ScreenHeader } from '@/components/ui/ScreenHeader';
-import { YearStepper } from '@/components/ui/YearStepper';
-import { EmptyState } from '@/components/ui/EmptyState';
-import { ErrorState } from '@/components/ui/ErrorState';
-import { SkeletonCard } from '@/components/ui/SkeletonCard';
-import { SummaryCards } from '@/components/analytics/SummaryCards';
-import { MonthlyBars } from '@/components/analytics/MonthlyBars';
-import { CategoryBreakdown } from '@/components/analytics/CategoryBreakdown';
-import { NetList } from '@/components/analytics/NetList';
-import { useGetAnalyticsQuery } from '@/store/api';
-import { usePeriod } from '@/hooks/usePeriod';
-import { useStableData } from '@/hooks/useStableData';
-import { usePullToRefresh } from '@/hooks/usePullToRefresh';
-import { colors } from '@/theme/tokens';
+import { CategoryBreakdown } from "@/components/analytics/CategoryBreakdown";
+import { MonthlyBars } from "@/components/analytics/MonthlyBars";
+import { NetList } from "@/components/analytics/NetList";
+import { SummaryCards } from "@/components/analytics/SummaryCards";
+import { Card } from "@/components/ui/Card";
+import { EmptyState } from "@/components/ui/EmptyState";
+import { ErrorState } from "@/components/ui/ErrorState";
+import { Icon, type IconComponent } from "@/components/ui/Icon";
+import { Screen } from "@/components/ui/Screen";
+import { ScreenHeader } from "@/components/ui/ScreenHeader";
+import { SkeletonCard } from "@/components/ui/SkeletonCard";
+import { Text } from "@/components/ui/Text";
+import { YearStepper } from "@/components/ui/YearStepper";
+import { usePeriod } from "@/hooks/usePeriod";
+import { usePullToRefresh } from "@/hooks/usePullToRefresh";
+import { useStableData } from "@/hooks/useStableData";
+import { useGetAnalyticsQuery } from "@/store/api";
+import { colors } from "@/theme/tokens";
+import { BarChart3, PieChart, Scale } from "lucide-react-native";
+import type { ReactNode } from "react";
+import { View } from "react-native";
 
-function Section({ title, icon, children }: { title: string; icon: IconComponent; children: ReactNode }) {
+function Section({
+  title,
+  icon,
+  children,
+}: {
+  title: string;
+  icon: IconComponent;
+  children: ReactNode;
+}) {
   return (
     <Card className="mt-3">
       <View className="mb-3 flex-row items-center gap-2">
@@ -34,7 +42,11 @@ function Section({ title, icon, children }: { title: string; icon: IconComponent
 
 export default function AnalyticsScreen() {
   const { year } = usePeriod();
-  const { data: raw, isError, refetch } = useGetAnalyticsQuery(year, {
+  const {
+    data: raw,
+    isError,
+    refetch,
+  } = useGetAnalyticsQuery(year, {
     refetchOnMountOrArgChange: true,
   });
   // Yıl değişiminde önceki veriyi koru → layout zıplamaz.
@@ -64,7 +76,10 @@ export default function AnalyticsScreen() {
       ) : isError && !data ? (
         <ErrorState onRetry={refetch} />
       ) : !hasData ? (
-        <EmptyState message="Bu yıl için analiz verisi yok." />
+        <EmptyState
+          message="Bu yıl için analiz verisi yok"
+          description="Gelir ve gider ekledikçe aylık özet, kategori dağılımı ve net durum burada görünür."
+        />
       ) : (
         <>
           <SummaryCards summary={data!.year_summary} />

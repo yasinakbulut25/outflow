@@ -1,27 +1,30 @@
-import { useMemo, useRef } from 'react';
-import { View, Pressable } from 'react-native';
-import { Plus, TrendingUp } from 'lucide-react-native';
-import { Screen } from '@/components/ui/Screen';
-import { Text } from '@/components/ui/Text';
-import { Icon } from '@/components/ui/Icon';
-import { SkeletonCard } from '@/components/ui/SkeletonCard';
-import { ErrorState } from '@/components/ui/ErrorState';
-import { EmptyState } from '@/components/ui/EmptyState';
-import { ScreenHeader } from '@/components/ui/ScreenHeader';
-import { YearStepper } from '@/components/ui/YearStepper';
-import { PeriodBar } from '@/components/expenses/PeriodBar';
-import { IncomeCard } from '@/components/income/IncomeCard';
-import { IncomeFormSheet, type IncomeFormSheetRef } from '@/components/income/IncomeFormSheet';
-import { useGetIncomesQuery, useGetRecurringIncomesQuery } from '@/store/api';
-import { usePeriod } from '@/hooks/usePeriod';
-import { useStableData } from '@/hooks/useStableData';
-import { usePullToRefresh } from '@/hooks/usePullToRefresh';
-import { haptics } from '@/lib/haptics';
-import { formatCurrency } from '@/lib/formatters';
-import { colors } from '@/theme/tokens';
-import type { Income } from '@/types';
+import { PeriodBar } from "@/components/expenses/PeriodBar";
+import { IncomeCard } from "@/components/income/IncomeCard";
+import {
+  IncomeFormSheet,
+  type IncomeFormSheetRef,
+} from "@/components/income/IncomeFormSheet";
+import { EmptyState } from "@/components/ui/EmptyState";
+import { ErrorState } from "@/components/ui/ErrorState";
+import { Icon } from "@/components/ui/Icon";
+import { Screen } from "@/components/ui/Screen";
+import { ScreenHeader } from "@/components/ui/ScreenHeader";
+import { SkeletonCard } from "@/components/ui/SkeletonCard";
+import { Text } from "@/components/ui/Text";
+import { YearStepper } from "@/components/ui/YearStepper";
+import { usePeriod } from "@/hooks/usePeriod";
+import { usePullToRefresh } from "@/hooks/usePullToRefresh";
+import { useStableData } from "@/hooks/useStableData";
+import { formatCurrency } from "@/lib/formatters";
+import { haptics } from "@/lib/haptics";
+import { useGetIncomesQuery, useGetRecurringIncomesQuery } from "@/store/api";
+import { colors } from "@/theme/tokens";
+import type { Income } from "@/types";
+import { Plus, TrendingUp } from "lucide-react-native";
+import { useMemo, useRef } from "react";
+import { Pressable, View } from "react-native";
 
-const TEAL = '#16a34a';
+const TEAL = "#16a34a";
 
 export default function IncomeScreen() {
   const sheet = useRef<IncomeFormSheetRef>(null);
@@ -37,11 +40,16 @@ export default function IncomeScreen() {
   // Dönem değişiminde önceki veriyi koru → liste iskelete çökmez, layout zıplamaz.
   const incomesData = useStableData(incomes.data);
   const list = incomesData ?? [];
-  const total = useMemo(() => list.reduce((sum, i) => sum + i.amount, 0), [list]);
+  const total = useMemo(
+    () => list.reduce((sum, i) => sum + i.amount, 0),
+    [list],
+  );
 
   const onPressIncome = (income: Income) => {
     if (income.recurring_income_id) {
-      const tpl = templates.data?.find((t) => t.id === income.recurring_income_id);
+      const tpl = templates.data?.find(
+        (t) => t.id === income.recurring_income_id,
+      );
       if (tpl) sheet.current?.present({ template: tpl });
     } else {
       sheet.current?.present({ income });
@@ -55,14 +63,28 @@ export default function IncomeScreen() {
   return (
     <View className="flex-1">
       <Screen scroll refreshing={refreshing} onRefresh={onRefresh}>
-        <ScreenHeader title="Gelirler" description="Tekrarlayan ve tek seferlik gelirlerini yönet." right={<YearStepper />} />
+        <ScreenHeader
+          title="Gelirler"
+          description="Tekrarlayan ve tek seferlik gelirlerini yönet."
+          right={<YearStepper />}
+        />
 
-        <View className="mb-4 rounded-2xl p-4" style={{ backgroundColor: TEAL }}>
-          <Text className="text-sm font-medium text-white/80">Toplam gelir</Text>
-          <Text className="mt-1 text-3xl font-bold text-white" style={{ fontVariant: ['tabular-nums'] }}>
+        <View
+          className="mb-4 rounded-2xl p-4"
+          style={{ backgroundColor: TEAL }}
+        >
+          <Text className="text-sm font-medium text-white/80">
+            Toplam gelir
+          </Text>
+          <Text
+            className="mt-1 text-3xl font-bold text-white"
+            style={{ fontVariant: ["tabular-nums"] }}
+          >
             {formatCurrency(total)} ₺
           </Text>
-          <Text className="mt-1 text-sm text-white/80">{list.length} kayıt</Text>
+          <Text className="mt-1 text-sm text-white/80">
+            {list.length} kayıt
+          </Text>
         </View>
 
         <PeriodBar />
@@ -76,9 +98,15 @@ export default function IncomeScreen() {
           ) : incomes.isError && !list.length ? (
             <ErrorState onRetry={incomes.refetch} />
           ) : list.length ? (
-            list.map((i) => <IncomeCard key={i.id} income={i} onPress={onPressIncome} />)
+            list.map((i) => (
+              <IncomeCard key={i.id} income={i} onPress={onPressIncome} />
+            ))
           ) : (
-            <EmptyState message="Bu dönemde gelir yok." icon={TrendingUp} />
+            <EmptyState
+              message="Bu dönemde gelir yok"
+              description="Maaş gibi düzenli ya da tek seferlik gelirini ekleyebilirsin; dönem özetine yansır."
+              icon={TrendingUp}
+            />
           )}
         </View>
       </Screen>
@@ -93,7 +121,7 @@ export default function IncomeScreen() {
         className="absolute bottom-6 right-5 h-14 w-14 items-center justify-center rounded-full active:opacity-80"
         style={{
           backgroundColor: TEAL,
-          shadowColor: '#000',
+          shadowColor: "#000",
           shadowOffset: { width: 0, height: 2 },
           shadowOpacity: 0.2,
           shadowRadius: 6,
