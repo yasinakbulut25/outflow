@@ -18,12 +18,15 @@ export function Input({ className, invalid, style, bottomSheet, ...rest }: Input
       placeholderTextColor={colors.muted}
       textAlignVertical="center"
       className={cn(
-        'rounded-xl border bg-white px-3 py-3 text-base text-foreground',
+        'h-12 rounded-xl border bg-white px-3 text-foreground',
         invalid ? 'border-danger' : 'border-border',
         className,
       )}
-      // includeFontPadding: Android'de metnin üstte boşluk bırakmasını önler (dikey ortalama).
-      style={[{ includeFontPadding: false }, style]}
+      // Dikey ortalama: sabit yükseklik (h-12) + paddingVertical:0 + textAlignVertical:center.
+      // fontSize style'dan verilir; `text-base` className'i lineHeight:24 de eklerdi ve bu fazla
+      // satır yüksekliği metni (özellikle iOS'ta) aşağı kaydırıp yazınca zıplatırdı.
+      // includeFontPadding:false Android'de fontun üstte bıraktığı boşluğu kaldırır.
+      style={[{ fontSize: 16, paddingVertical: 0, includeFontPadding: false }, style]}
       {...rest}
     />
   );

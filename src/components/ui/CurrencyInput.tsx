@@ -1,7 +1,6 @@
 import { useState } from 'react';
 import { cn } from '@/lib/cn';
-import { colors } from '@/theme/tokens';
-import { SheetTextInput } from '@/components/ui/SheetTextInput';
+import { Input } from '@/components/ui/Input';
 
 // Tutar girişi: yazılan sayı doğrudan değerdir. "999" → 999, "1200" → 1.200 (=1200 TL).
 // Opsiyonel virgülle kuruş: "1234,5" → 1234,5. Gösterimde binlik ayırıcı eklenir.
@@ -61,19 +60,17 @@ export function CurrencyInput({ value, onChangeValue, invalid, className }: Curr
   }
 
   return (
-    <SheetTextInput
+    <Input
+      bottomSheet
       value={display(text)}
       onChangeText={handleChange}
       keyboardType="decimal-pad"
       placeholder="0"
-      placeholderTextColor={colors.muted}
-      textAlignVertical="center"
-      className={cn(
-        'rounded-xl border bg-white px-3 py-3 text-right text-base font-semibold text-foreground',
-        invalid ? 'border-danger' : 'border-border',
-        className,
-      )}
-      style={{ fontVariant: ['tabular-nums'], includeFontPadding: false }}
+      invalid={invalid}
+      // Taban görsel (yükseklik, kenarlık, dikey ortalama) Input'tan gelir; burada
+      // yalnızca tutara özgü sağa-yaslı, kalın ve tabular-nums eklenir.
+      className={cn('text-right font-semibold', className)}
+      style={{ fontVariant: ['tabular-nums'] }}
     />
   );
 }
