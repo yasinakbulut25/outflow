@@ -15,6 +15,7 @@ import { formatDate } from '@/lib/formatters';
 import { useAppDispatch } from '@/store/hooks';
 import { addToast } from '@/store/slices/uiSlice';
 import { getErrorMessage } from '@/lib/apiError';
+import { LIMITS } from '@/lib/limits';
 import {
   useCreateIncomeMutation,
   useUpdateIncomeMutation,
@@ -196,7 +197,7 @@ export const IncomeFormSheet = forwardRef<IncomeFormSheetRef>((_props, ref) => {
         </View>
 
         <Field label="Başlık">
-          <Input bottomSheet value={title} onChangeText={setTitle} placeholder={repeat ? 'Örn. Maaş' : 'Örn. Ek iş ödemesi'} />
+          <Input bottomSheet value={title} onChangeText={setTitle} maxLength={LIMITS.title} placeholder={repeat ? 'Örn. Maaş' : 'Örn. Ek iş ödemesi'} />
         </Field>
 
         <Field label="Tutar">
@@ -284,7 +285,7 @@ export const IncomeFormSheet = forwardRef<IncomeFormSheetRef>((_props, ref) => {
         />
 
         <Field label="Not (opsiyonel)">
-          <Input bottomSheet value={note} onChangeText={setNote} placeholder="Açıklama" />
+          <Input bottomSheet value={note} onChangeText={setNote} maxLength={LIMITS.note} placeholder="Açıklama" />
         </Field>
 
         {editTpl ? (

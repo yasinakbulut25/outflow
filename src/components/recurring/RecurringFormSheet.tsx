@@ -16,6 +16,7 @@ import { formatDate } from '@/lib/formatters';
 import { useAppDispatch } from '@/store/hooks';
 import { addToast } from '@/store/slices/uiSlice';
 import { getErrorMessage } from '@/lib/apiError';
+import { LIMITS } from '@/lib/limits';
 import {
   useGetCategoriesQuery,
   useCreateRecurringMutation,
@@ -162,7 +163,7 @@ export const RecurringFormSheet = forwardRef<RecurringFormSheetRef>((_props, ref
         </View>
 
         <Field label="Başlık">
-          <Input bottomSheet value={title} onChangeText={setTitle} placeholder="Örn. Netflix aboneliği" />
+          <Input bottomSheet value={title} onChangeText={setTitle} maxLength={LIMITS.title} placeholder="Örn. Netflix aboneliği" />
         </Field>
 
         <Field label="Tutar">

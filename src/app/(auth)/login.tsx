@@ -13,6 +13,7 @@ import { useAppDispatch } from "@/store/hooks";
 import { signIn } from "@/store/slices/authSlice";
 import { addToast } from "@/store/slices/uiSlice";
 import type { AuthData } from "@/types";
+import { LIMITS } from "@/lib/limits";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as Google from "expo-auth-session/providers/google";
 import { Link, useRouter } from "expo-router";
@@ -27,8 +28,13 @@ WebBrowser.maybeCompleteAuthSession();
 const LOGO = require("../../../assets/images/icon.png");
 
 const schema = z.object({
-  email: z.string().trim().email("Geçerli bir e-posta gir"),
-  password: z.string().min(1, "Şifre gerekli"),
+  email: z
+    .string()
+    .trim()
+    .min(1, "E-posta gerekli")
+    .max(LIMITS.email, "E-posta çok uzun")
+    .email("Geçerli bir e-posta gir"),
+  password: z.string().min(1, "Şifre gerekli").max(LIMITS.password, "Şifre çok uzun"),
 });
 type FormValues = z.infer<typeof schema>;
 
@@ -118,6 +124,7 @@ export default function LoginScreen() {
                 autoCorrect={false}
                 autoComplete="email"
                 keyboardType="email-address"
+                maxLength={LIMITS.email}
                 placeholder="ornek@email.com"
                 returnKeyType="next"
               />
@@ -136,6 +143,7 @@ export default function LoginScreen() {
                 invalid={!!errors.password}
                 secureTextEntry
                 autoComplete="current-password"
+                maxLength={LIMITS.password}
                 placeholder="••••••••"
                 returnKeyType="done"
                 onSubmitEditing={onSubmit}

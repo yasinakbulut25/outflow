@@ -8,6 +8,7 @@ import { Text } from "@/components/ui/Text";
 import { getErrorMessage } from "@/lib/apiError";
 import { categoryIcon } from "@/lib/categoryIcons";
 import { cn } from "@/lib/cn";
+import { LIMITS } from "@/lib/limits";
 import {
   calculateInstallmentAmount,
   formatCurrency,
@@ -149,6 +150,10 @@ export const ExpenseFormSheet = forwardRef<
       prev.map((it) => (it.key === key ? { ...it, ...patch } : it)),
     );
   const addItem = () => {
+    if (items.length >= LIMITS.maxItems) {
+      dispatch(addToast(`En fazla ${LIMITS.maxItems} kalem ekleyebilirsin`, "warning"));
+      return;
+    }
     const row = newRow();
     setItems((prev) => [...prev, row]);
   };
@@ -261,6 +266,7 @@ export const ExpenseFormSheet = forwardRef<
             bottomSheet
             value={title}
             onChangeText={setTitle}
+            maxLength={LIMITS.title}
             placeholder="Örn. Market alışverişi"
           />
         </Field>
@@ -385,6 +391,7 @@ export const ExpenseFormSheet = forwardRef<
                 bottomSheet
                 value={it.name}
                 onChangeText={(t) => updateItem(it.key, { name: t })}
+                maxLength={LIMITS.itemName}
                 placeholder="Kalem adı"
                 className="flex-1"
               />

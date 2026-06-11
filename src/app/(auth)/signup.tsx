@@ -13,12 +13,21 @@ import { useAppDispatch } from '@/store/hooks';
 import { signIn } from '@/store/slices/authSlice';
 import { addToast } from '@/store/slices/uiSlice';
 import { getErrorMessage } from '@/lib/apiError';
+import { LIMITS } from '@/lib/limits';
 
 const schema = z
   .object({
-    name: z.string().trim().min(1, 'Ad gerekli'),
-    email: z.string().trim().email('Geçerli bir e-posta gir'),
-    password: z.string().min(6, 'En az 6 karakter'),
+    name: z.string().trim().min(1, 'Ad gerekli').max(LIMITS.name, 'Ad çok uzun'),
+    email: z
+      .string()
+      .trim()
+      .min(1, 'E-posta gerekli')
+      .max(LIMITS.email, 'E-posta çok uzun')
+      .email('Geçerli bir e-posta gir'),
+    password: z
+      .string()
+      .min(6, 'En az 6 karakter')
+      .max(LIMITS.password, 'Şifre çok uzun'),
     confirm: z.string().min(1, 'Şifreyi tekrar gir'),
   })
   .refine((v) => v.password === v.confirm, {
@@ -69,6 +78,7 @@ export default function SignupScreen() {
                 onBlur={onBlur}
                 invalid={!!errors.name}
                 autoComplete="name"
+                maxLength={LIMITS.name}
                 placeholder="Adın"
                 returnKeyType="next"
               />
@@ -89,6 +99,7 @@ export default function SignupScreen() {
                 autoCorrect={false}
                 autoComplete="email"
                 keyboardType="email-address"
+                maxLength={LIMITS.email}
                 placeholder="ornek@email.com"
                 returnKeyType="next"
               />
@@ -107,6 +118,7 @@ export default function SignupScreen() {
                 invalid={!!errors.password}
                 secureTextEntry
                 autoComplete="password-new"
+                maxLength={LIMITS.password}
                 placeholder="••••••••"
                 returnKeyType="next"
               />
@@ -125,6 +137,7 @@ export default function SignupScreen() {
                 invalid={!!errors.confirm}
                 secureTextEntry
                 autoComplete="password-new"
+                maxLength={LIMITS.password}
                 placeholder="••••••••"
                 returnKeyType="done"
                 onSubmitEditing={onSubmit}

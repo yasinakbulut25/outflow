@@ -15,6 +15,7 @@ import { BIRIKIM_CATEGORY_ID } from '@/lib/categoryIcons';
 import { useAppDispatch } from '@/store/hooks';
 import { addToast } from '@/store/slices/uiSlice';
 import { getErrorMessage } from '@/lib/apiError';
+import { LIMITS } from '@/lib/limits';
 import {
   useCreateExpenseMutation,
   useUpdateExpenseMutation,
@@ -149,11 +150,11 @@ export const SavingsFormSheet = forwardRef<SavingsFormSheetRef>((_props, ref) =>
         </View>
 
         <Field label="Ne biriktirdin?">
-          <Input bottomSheet value={title} onChangeText={setTitle} placeholder="Örn. Altın, Dolar, Nakit" />
+          <Input bottomSheet value={title} onChangeText={setTitle} maxLength={LIMITS.title} placeholder="Örn. Altın, Dolar, Nakit" />
         </Field>
 
         <Field label="Ne kadar?">
-          <Input bottomSheet value={quantity} onChangeText={setQuantity} placeholder="Örn. 1500, 40 gr" />
+          <Input bottomSheet value={quantity} onChangeText={setQuantity} maxLength={LIMITS.savingsQuantity} placeholder="Örn. 1500, 40 gr" />
         </Field>
 
         <Field label="Yaklaşık değer (₺) — opsiyonel">

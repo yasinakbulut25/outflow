@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { cn } from '@/lib/cn';
 import { Input } from '@/components/ui/Input';
+import { LIMITS } from '@/lib/limits';
 
 // Tutar girişi: yazılan sayı doğrudan değerdir. "999" → 999, "1200" → 1.200 (=1200 TL).
 // Opsiyonel virgülle kuruş: "1234,5" → 1234,5. Gösterimde binlik ayırıcı eklenir.
@@ -14,14 +15,15 @@ interface CurrencyInputProps {
 /** Girdiyi rakam + tek ondalık ayırıcıya (virgül) indirger, ondalığı 2 haneyle sınırlar.
  *  Binlik noktaları (gösterimden gelen) silinir — virgül = ondalık, nokta = ayırıcı. */
 function sanitize(raw: string): string {
-  let s = raw.replace(/[^\d,]/g, '');
+  const s = raw.replace(/[^\d,]/g, '');
   const i = s.indexOf(',');
   if (i !== -1) {
-    const intPart = s.slice(0, i).replace(/,/g, '');
+    // Tam kısmı azami haneyle sınırla → sınırsız büyüklükte/uzunlukta sayı engellenir.
+    const intPart = s.slice(0, i).replace(/,/g, '').slice(0, LIMITS.amountIntDigits);
     const dec = s.slice(i + 1).replace(/,/g, '').slice(0, 2);
-    s = `${intPart},${dec}`;
+    return `${intPart},${dec}`;
   }
-  return s;
+  return s.slice(0, LIMITS.amountIntDigits);
 }
 
 function toNumber(s: string): number {
