@@ -3,6 +3,8 @@ import { Button } from "@/components/ui/Button";
 import { Field } from "@/components/ui/Field";
 import { Input } from "@/components/ui/Input";
 import { Screen } from "@/components/ui/Screen";
+import { SocialButton } from "@/components/ui/SocialButton";
+import { GoogleLogo } from "@/components/ui/BrandLogos";
 import { Text } from "@/components/ui/Text";
 import { getErrorMessage } from "@/lib/apiError";
 import { GOOGLE_ANDROID_CLIENT_ID, GOOGLE_IOS_CLIENT_ID } from "@/lib/config";
@@ -17,10 +19,12 @@ import { Link, useRouter } from "expo-router";
 import * as WebBrowser from "expo-web-browser";
 import { useEffect } from "react";
 import { Controller, useForm } from "react-hook-form";
-import { TouchableOpacity, View } from "react-native";
+import { Image, View } from "react-native";
 import { z } from "zod";
 
 WebBrowser.maybeCompleteAuthSession();
+
+const LOGO = require("../../../assets/images/icon.png");
 
 const schema = z.object({
   email: z.string().trim().email("Geçerli bir e-posta gir"),
@@ -79,10 +83,24 @@ export default function LoginScreen() {
   });
 
   return (
-    <Screen scroll className="justify-center gap-6">
-      <View className="gap-1">
-        <Text variant="h1">Outflow</Text>
-        <Text variant="muted">Hesabına giriş yap</Text>
+    <Screen scroll className="justify-center gap-8">
+      <View className="items-center gap-4">
+        <Image
+          source={LOGO}
+          style={{
+            width: 76,
+            height: 76,
+            borderRadius: 20,
+            shadowColor: "#000",
+            shadowOffset: { width: 0, height: 6 },
+            shadowOpacity: 0.12,
+            shadowRadius: 14,
+          }}
+        />
+        <View className="items-center gap-1">
+          <Text variant="h1">Outflow</Text>
+          <Text variant="muted">Hesabına giriş yap</Text>
+        </View>
       </View>
 
       <View className="gap-4">
@@ -90,7 +108,7 @@ export default function LoginScreen() {
           control={control}
           name="email"
           render={({ field: { onChange, onBlur, value } }) => (
-            <Field label="E-posta ad" error={errors.email?.message}>
+            <Field label="E-posta" error={errors.email?.message}>
               <Input
                 value={value}
                 onChangeText={onChange}
@@ -138,14 +156,12 @@ export default function LoginScreen() {
       </View>
 
       <View className="gap-3">
-        <TouchableOpacity
+        <SocialButton
+          label="Google ile devam et"
+          logo={<GoogleLogo size={18} />}
           onPress={() => void googlePromptAsync()}
-          disabled={googleLoading}
-          activeOpacity={0.7}
-          className="flex-row items-center justify-center gap-3 rounded-xl border border-border bg-surface px-4 py-3"
-        >
-          <Text className="text-sm font-medium">Google ile devam et</Text>
-        </TouchableOpacity>
+          loading={googleLoading}
+        />
 
         <AppleSignInButton onSuccess={finishSignIn} />
       </View>

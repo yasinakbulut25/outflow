@@ -4,12 +4,15 @@ import { useAppleAuthMutation } from '@/store/api';
 import { useAppDispatch } from '@/store/hooks';
 import { addToast } from '@/store/slices/uiSlice';
 import { getErrorMessage } from '@/lib/apiError';
+import { SocialButton } from '@/components/ui/SocialButton';
+import { AppleLogo } from '@/components/ui/BrandLogos';
 import type { AppleSignInButtonProps } from './AppleSignInButton';
 
 export default function AppleSignInButton({ onSuccess }: AppleSignInButtonProps) {
   const dispatch = useAppDispatch();
   const [appleAuth] = useAppleAuthMutation();
   const [available, setAvailable] = useState(false);
+  const [busy, setBusy] = useState(false);
 
   useEffect(() => {
     AppleAuthentication.isAvailableAsync()
@@ -20,6 +23,7 @@ export default function AppleSignInButton({ onSuccess }: AppleSignInButtonProps)
   if (!available) return null;
 
   const onPress = async () => {
+    setBusy(true);
     try {
       const credential = await AppleAuthentication.signInAsync({
         requestedScopes: [
@@ -41,16 +45,17 @@ export default function AppleSignInButton({ onSuccess }: AppleSignInButtonProps)
     } catch (err: unknown) {
       if ((err as { code?: string }).code === 'ERR_REQUEST_CANCELED') return;
       dispatch(addToast(getErrorMessage(err, 'Apple ile giriş başarısız'), 'error'));
+    } finally {
+      setBusy(false);
     }
   };
 
   return (
-    <AppleAuthentication.AppleAuthenticationButton
-      buttonType={AppleAuthentication.AppleAuthenticationButtonType.SIGN_IN}
-      buttonStyle={AppleAuthentication.AppleAuthenticationButtonStyle.BLACK}
-      cornerRadius={12}
-      style={{ height: 48 }}
+    <SocialButton
+      label="Apple ile devam et"
+      logo={<AppleLogo size={18} />}
       onPress={onPress}
+      loading={busy}
     />
   );
 }
