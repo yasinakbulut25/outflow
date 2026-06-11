@@ -26,7 +26,7 @@ export default function RecurringScreen() {
   return (
     <SafeAreaView
       style={{ flex: 1, backgroundColor: colors.background }}
-      edges={["top"]}
+      edges={[]}
     >
       {isLoading ? (
         <View className="flex-1 px-4 pt-4">

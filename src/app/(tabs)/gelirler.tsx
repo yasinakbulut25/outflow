@@ -62,7 +62,7 @@ export default function IncomeScreen() {
 
   return (
     <View className="flex-1">
-      <Screen scroll refreshing={refreshing} onRefresh={onRefresh}>
+      <Screen scroll safeTop={false} refreshing={refreshing} onRefresh={onRefresh}>
         <ScreenHeader
           title="Gelirler"
           description="Tekrarlayan ve tek seferlik gelirlerini yönet."

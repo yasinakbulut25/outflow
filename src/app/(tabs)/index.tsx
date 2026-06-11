@@ -19,7 +19,7 @@ export default function ExpensesScreen() {
   const { data: templates } = useGetRecurringQuery();
 
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: colors.background }} edges={['top']}>
+    <SafeAreaView style={{ flex: 1, backgroundColor: colors.background }} edges={[]}>
       <ExpenseList
         onPressExpense={(e) => sheetRef.current?.present(e)}
         onPressSaving={(e) => savingsSheet.current?.present(e)}

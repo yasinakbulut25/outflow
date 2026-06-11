@@ -1,6 +1,7 @@
 import { Redirect, Tabs } from 'expo-router';
 import { Wallet, TrendingUp, HandCoins, BarChart3, Repeat } from 'lucide-react-native';
 import { useAppSelector } from '@/store/hooks';
+import { TopBar } from '@/components/ui/TopBar';
 import { colors } from '@/theme/tokens';
 
 export default function TabsLayout() {
@@ -20,7 +21,8 @@ export default function TabsLayout() {
   return (
     <Tabs
       screenOptions={{
-        headerShown: false,
+        headerShown: true,
+        header: () => <TopBar />,
         tabBarInactiveTintColor: colors.muted,
         tabBarStyle: { borderTopColor: colors.border },
         tabBarLabelStyle: { fontSize: 11 },

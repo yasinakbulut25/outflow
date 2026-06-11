@@ -10,11 +10,14 @@ interface ScreenProps {
   refreshing?: boolean;
   onRefresh?: () => void;
   className?: string;
+  /** Üst güvenli alan boşluğu uygulansın mı. Üstte bir navbar/header varsa false ver
+   *  (aksi halde çift boşluk oluşur). Varsayılan true (örn. auth ekranları). */
+  safeTop?: boolean;
 }
 
-export function Screen({ children, scroll, refreshing, onRefresh, className }: ScreenProps) {
+export function Screen({ children, scroll, refreshing, onRefresh, className, safeTop = true }: ScreenProps) {
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: colors.background }} edges={['top']}>
+    <SafeAreaView style={{ flex: 1, backgroundColor: colors.background }} edges={safeTop ? ['top'] : []}>
       {scroll ? (
         <ScrollView
           className="flex-1"

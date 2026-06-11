@@ -60,7 +60,7 @@ export default function AnalyticsScreen() {
       data.category_totals.length > 0);
 
   return (
-    <Screen scroll refreshing={refreshing} onRefresh={onRefresh}>
+    <Screen scroll safeTop={false} refreshing={refreshing} onRefresh={onRefresh}>
       <ScreenHeader
         title="Analiz"
         description="Yıllık gelir, gider ve kategori dağılımının özeti."

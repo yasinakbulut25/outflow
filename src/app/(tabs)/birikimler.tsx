@@ -83,7 +83,7 @@ export default function SavingsScreen() {
   return (
     <SafeAreaView
       style={{ flex: 1, backgroundColor: colors.background }}
-      edges={["top"]}
+      edges={[]}
     >
       {data === undefined ? (
         <View className="flex-1 px-4 pt-4">
