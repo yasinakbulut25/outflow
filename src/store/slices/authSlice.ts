@@ -2,6 +2,7 @@ import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import type { AuthData, User } from '@/types';
 import { getToken, setToken, getStoredUser, setStoredUser, clearSession } from '@/lib/secureToken';
 import { api } from '@/store/api';
+import { MOCK_TOKEN, enableMockSession, disableMockSession } from '@/lib/mockBackend';
 
 interface AuthState {
   user: User | null;
@@ -14,6 +15,8 @@ const initialState: AuthState = { user: null, hydrated: false };
 export const bootstrapAuth = createAsyncThunk('auth/bootstrap', async () => {
   const token = await getToken();
   if (!token) return null;
+  // Saklı token mock token ise → demo oturumu yeniden aç (uygulama yeniden açılışında).
+  if (token === MOCK_TOKEN) enableMockSession();
   return await getStoredUser();
 });
 
@@ -27,6 +30,7 @@ export const signIn = createAsyncThunk('auth/signIn', async (auth: AuthData) => 
 /** Çıkış: oturumu temizle + RTK Query cache'ini sıfırla. */
 export const signOut = createAsyncThunk('auth/signOut', async (_, { dispatch }) => {
   await clearSession();
+  disableMockSession(); // demo oturumundan çıkışta gerçek backend'e geri dön
   dispatch(api.util.resetApiState());
 });
 

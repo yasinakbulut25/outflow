@@ -7,6 +7,7 @@ import {
 } from '@reduxjs/toolkit/query/react';
 import { REHYDRATE } from 'redux-persist';
 import { API_URL } from '@/lib/config';
+import { mockBaseQuery, isMockSessionActive } from '@/lib/mockBackend';
 import { getToken, clearToken } from '@/lib/secureToken';
 import type {
   ApiResponse,
@@ -34,7 +35,7 @@ const rawBaseQuery = fetchBaseQuery({
 });
 
 // { success, data, message } zarfını açar; success:false'u hataya çevirir; 401'de token siler.
-const baseQuery: BaseQueryFn<string | FetchArgs, unknown, FetchBaseQueryError> = async (
+const realBaseQuery: BaseQueryFn<string | FetchArgs, unknown, FetchBaseQueryError> = async (
   args,
   apiArg,
   extraOptions,
@@ -55,6 +56,13 @@ const baseQuery: BaseQueryFn<string | FetchArgs, unknown, FetchBaseQueryError> =
   }
   return { data: body?.data };
 };
+
+// İstek başına yönlendirme: demo bilgisiyle açılan runtime mock oturumu aktifse mock
+// backend'e; aksi halde gerçek backend'e gider.
+const baseQuery: BaseQueryFn<string | FetchArgs, unknown, FetchBaseQueryError> = (args, apiArg, extraOptions) =>
+  isMockSessionActive()
+    ? mockBaseQuery(args, apiArg, extraOptions)
+    : realBaseQuery(args, apiArg, extraOptions);
 
 export const api = createApi({
   reducerPath: 'api',

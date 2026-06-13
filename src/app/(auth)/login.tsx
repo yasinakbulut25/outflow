@@ -14,6 +14,7 @@ import { signIn } from "@/store/slices/authSlice";
 import { addToast } from "@/store/slices/uiSlice";
 import type { AuthData } from "@/types";
 import { LIMITS } from "@/lib/limits";
+import { enableMockSession, isMockCredentials } from "@/lib/mockBackend";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as Google from "expo-auth-session/providers/google";
 import { Link, useRouter } from "expo-router";
@@ -80,6 +81,9 @@ export default function LoginScreen() {
   }
 
   const onSubmit = handleSubmit(async (values) => {
+    // Demo bilgileri → bu oturum mock backend'e yönlensin (login isteği dahil).
+    // Tek bir normal production build app-review'da demo hesapla çalışsın diye runtime'da açılır.
+    if (isMockCredentials(values.email, values.password)) enableMockSession();
     try {
       const auth = await login(values).unwrap();
       await finishSignIn(auth);
