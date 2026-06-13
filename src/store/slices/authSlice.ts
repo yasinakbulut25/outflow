@@ -27,6 +27,12 @@ export const signIn = createAsyncThunk('auth/signIn', async (auth: AuthData) => 
   return auth.user;
 });
 
+/** Profil güncellemesi: yeni kullanıcıyı sakla + state'i tazele. */
+export const updateUser = createAsyncThunk('auth/updateUser', async (user: User) => {
+  await setStoredUser(user);
+  return user;
+});
+
 /** Çıkış: oturumu temizle + RTK Query cache'ini sıfırla. */
 export const signOut = createAsyncThunk('auth/signOut', async (_, { dispatch }) => {
   await clearSession();
@@ -51,6 +57,9 @@ const authSlice = createSlice({
         state.hydrated = true;
       })
       .addCase(signIn.fulfilled, (state, action) => {
+        state.user = action.payload;
+      })
+      .addCase(updateUser.fulfilled, (state, action) => {
         state.user = action.payload;
       })
       .addCase(signOut.fulfilled, (state) => {

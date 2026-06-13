@@ -39,11 +39,15 @@ export const MOCK_CREDENTIALS = {
   password: "demo1234",
 };
 
-const DEMO_USER: User = {
+// Mutable: profil ekranından ad/şifre değiştirilebilsin (oturum boyunca kalıcı,
+// uygulama yeniden yüklenince MOCK_CREDENTIALS'a sıfırlanır — mock için kabul edilebilir).
+// not const: Redux'a girince Immer nesneyi dondurur; ad değişiminde yeni nesne atarız.
+let DEMO_USER: User = {
   id: 1,
   name: "Yasin Akbulut",
   email: MOCK_CREDENTIALS.email,
 };
+let mockPassword = MOCK_CREDENTIALS.password;
 // Bu token'la giriş yapılan oturum = mock oturumu. Gerçek backend JWT'leri bununla
 // asla çakışmaz; bootstrap'ta token'ı görünce mock oturumu tekrar açabiliriz.
 export const MOCK_TOKEN = "mock-jwt-token.outflow.demo";
@@ -893,13 +897,24 @@ export const mockBaseQuery: BaseQueryFn<
       .trim()
       .toLowerCase();
     const password = String(body?.password ?? "");
-    if (
-      email === MOCK_CREDENTIALS.email &&
-      password === MOCK_CREDENTIALS.password
-    ) {
+    if (email === MOCK_CREDENTIALS.email && password === mockPassword) {
       return ok({ token: MOCK_TOKEN, user: DEMO_USER } satisfies AuthData);
     }
     return fail(400, "E-posta veya şifre hatalı");
+  }
+  if (path === "/auth/profile" && method === "PUT") {
+    const name = String(body?.name ?? "").trim();
+    if (!name) return fail(400, "Ad gerekli");
+    DEMO_USER = { ...DEMO_USER, name };
+    return ok(DEMO_USER);
+  }
+  if (path === "/auth/password" && method === "PUT") {
+    const current = String(body?.currentPassword ?? "");
+    const next = String(body?.newPassword ?? "");
+    if (current !== mockPassword) return fail(400, "Mevcut şifre hatalı");
+    if (next.length < 6) return fail(400, "Yeni şifre en az 6 karakter olmalı");
+    mockPassword = next;
+    return ok({ success: true });
   }
   if (path === "/auth/register" && method === "POST") {
     const user: User = {

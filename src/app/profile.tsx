@@ -1,15 +1,41 @@
 import { useState } from 'react';
-import { View, Pressable, Alert } from 'react-native';
+import { View, Pressable, Alert, ScrollView } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import { ChevronLeft, LogOut } from 'lucide-react-native';
+import { Controller, useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { z } from 'zod';
 import { Text } from '@/components/ui/Text';
 import { Button } from '@/components/ui/Button';
 import { Card } from '@/components/ui/Card';
+import { Field } from '@/components/ui/Field';
+import { Input } from '@/components/ui/Input';
 import { Icon } from '@/components/ui/Icon';
 import { useAppDispatch, useAppSelector } from '@/store/hooks';
-import { signOut } from '@/store/slices/authSlice';
+import { signOut, updateUser } from '@/store/slices/authSlice';
+import { addToast } from '@/store/slices/uiSlice';
+import { useUpdateProfileMutation, useChangePasswordMutation } from '@/store/api';
+import { getErrorMessage } from '@/lib/apiError';
+import { LIMITS } from '@/lib/limits';
 import { colors } from '@/theme/tokens';
+
+const nameSchema = z.object({
+  name: z.string().trim().min(1, 'Ad gerekli').max(LIMITS.name, 'Ad çok uzun'),
+});
+type NameValues = z.infer<typeof nameSchema>;
+
+const passwordSchema = z
+  .object({
+    currentPassword: z.string().min(1, 'Mevcut şifre gerekli').max(LIMITS.password, 'Şifre çok uzun'),
+    newPassword: z.string().min(6, 'En az 6 karakter').max(LIMITS.password, 'Şifre çok uzun'),
+    confirm: z.string().min(1, 'Yeni şifreyi tekrar gir'),
+  })
+  .refine((v) => v.newPassword === v.confirm, {
+    path: ['confirm'],
+    message: 'Şifreler eşleşmiyor',
+  });
+type PasswordValues = z.infer<typeof passwordSchema>;
 
 export default function ProfileScreen() {
   const router = useRouter();
@@ -17,9 +43,46 @@ export default function ProfileScreen() {
   const user = useAppSelector((s) => s.auth.user);
   const [busy, setBusy] = useState(false);
 
+  const [updateProfile, { isLoading: savingName }] = useUpdateProfileMutation();
+  const [changePassword, { isLoading: savingPassword }] = useChangePasswordMutation();
+
   const name = user?.name?.trim() || 'Hesabım';
   const email = user?.email?.trim() || '';
   const initial = (user?.name?.trim()?.[0] ?? user?.email?.trim()?.[0] ?? '?').toUpperCase();
+
+  const nameForm = useForm<NameValues>({
+    resolver: zodResolver(nameSchema),
+    defaultValues: { name: user?.name ?? '' },
+  });
+
+  const passwordForm = useForm<PasswordValues>({
+    resolver: zodResolver(passwordSchema),
+    defaultValues: { currentPassword: '', newPassword: '', confirm: '' },
+  });
+
+  const onSaveName = nameForm.handleSubmit(async (values) => {
+    try {
+      const updated = await updateProfile({ name: values.name }).unwrap();
+      await dispatch(updateUser(updated)).unwrap();
+      nameForm.reset({ name: updated.name ?? values.name });
+      dispatch(addToast('Adın güncellendi', 'success'));
+    } catch (err) {
+      dispatch(addToast(getErrorMessage(err, 'Ad güncellenemedi'), 'error'));
+    }
+  });
+
+  const onChangePassword = passwordForm.handleSubmit(async (values) => {
+    try {
+      await changePassword({
+        currentPassword: values.currentPassword,
+        newPassword: values.newPassword,
+      }).unwrap();
+      passwordForm.reset({ currentPassword: '', newPassword: '', confirm: '' });
+      dispatch(addToast('Şifren güncellendi', 'success'));
+    } catch (err) {
+      dispatch(addToast(getErrorMessage(err, 'Şifre değiştirilemedi'), 'error'));
+    }
+  });
 
   const onLogout = () => {
     Alert.alert('Çıkış yap', 'Oturumu kapatmak istediğine emin misin?', [
@@ -51,11 +114,13 @@ export default function ProfileScreen() {
         <Text variant="h1">Profil</Text>
       </View>
 
-      <View className="flex-1 px-4 pt-2">
+      <ScrollView
+        className="flex-1"
+        contentContainerClassName="px-4 pt-2 pb-8 gap-6"
+        keyboardShouldPersistTaps="handled"
+      >
         <Card className="flex-row items-center gap-3">
-          <View
-            className="h-14 w-14 items-center justify-center rounded-full border border-border bg-surface"
-          >
+          <View className="h-14 w-14 items-center justify-center rounded-full border border-border bg-surface">
             <Text variant="h2">{initial}</Text>
           </View>
           <View className="flex-1">
@@ -66,16 +131,106 @@ export default function ProfileScreen() {
           </View>
         </Card>
 
-        <View className="mt-6">
+        <View className="gap-3">
+          <Text variant="label">Ad</Text>
+          <Controller
+            control={nameForm.control}
+            name="name"
+            render={({ field: { onChange, onBlur, value } }) => (
+              <Field error={nameForm.formState.errors.name?.message}>
+                <Input
+                  value={value}
+                  onChangeText={onChange}
+                  onBlur={onBlur}
+                  invalid={!!nameForm.formState.errors.name}
+                  autoComplete="name"
+                  maxLength={LIMITS.name}
+                  placeholder="Adın"
+                  returnKeyType="done"
+                  onSubmitEditing={onSaveName}
+                />
+              </Field>
+            )}
+          />
+          <Button label="Adı kaydet" onPress={onSaveName} loading={savingName} />
+        </View>
+
+        <View className="gap-3">
+          <Text variant="label">Şifre değiştir</Text>
+          <Controller
+            control={passwordForm.control}
+            name="currentPassword"
+            render={({ field: { onChange, onBlur, value } }) => (
+              <Field label="Mevcut şifre" error={passwordForm.formState.errors.currentPassword?.message}>
+                <Input
+                  value={value}
+                  onChangeText={onChange}
+                  onBlur={onBlur}
+                  invalid={!!passwordForm.formState.errors.currentPassword}
+                  secureTextEntry
+                  autoComplete="current-password"
+                  maxLength={LIMITS.password}
+                  placeholder="••••••••"
+                  returnKeyType="next"
+                />
+              </Field>
+            )}
+          />
+          <Controller
+            control={passwordForm.control}
+            name="newPassword"
+            render={({ field: { onChange, onBlur, value } }) => (
+              <Field label="Yeni şifre" error={passwordForm.formState.errors.newPassword?.message}>
+                <Input
+                  value={value}
+                  onChangeText={onChange}
+                  onBlur={onBlur}
+                  invalid={!!passwordForm.formState.errors.newPassword}
+                  secureTextEntry
+                  autoComplete="password-new"
+                  maxLength={LIMITS.password}
+                  placeholder="••••••••"
+                  returnKeyType="next"
+                />
+              </Field>
+            )}
+          />
+          <Controller
+            control={passwordForm.control}
+            name="confirm"
+            render={({ field: { onChange, onBlur, value } }) => (
+              <Field label="Yeni şifre (tekrar)" error={passwordForm.formState.errors.confirm?.message}>
+                <Input
+                  value={value}
+                  onChangeText={onChange}
+                  onBlur={onBlur}
+                  invalid={!!passwordForm.formState.errors.confirm}
+                  secureTextEntry
+                  autoComplete="password-new"
+                  maxLength={LIMITS.password}
+                  placeholder="••••••••"
+                  returnKeyType="done"
+                  onSubmitEditing={onChangePassword}
+                />
+              </Field>
+            )}
+          />
           <Button
-            label="Çıkış yap"
-            variant="danger"
-            leftIcon={LogOut}
-            onPress={onLogout}
-            loading={busy}
+            label="Şifreyi değiştir"
+            variant="secondary"
+            onPress={onChangePassword}
+            loading={savingPassword}
           />
         </View>
-      </View>
+
+        <Button
+          label="Çıkış yap"
+          variant="danger"
+          leftIcon={LogOut}
+          onPress={onLogout}
+          loading={busy}
+        />
+      </ScrollView>
     </SafeAreaView>
   );
 }

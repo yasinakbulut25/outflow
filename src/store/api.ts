@@ -12,6 +12,7 @@ import { getToken, clearToken } from '@/lib/secureToken';
 import type {
   ApiResponse,
   AuthData,
+  User,
   Category,
   Expense,
   CreateExpensePayload,
@@ -88,6 +89,12 @@ export const api = createApi({
     }),
     appleAuth: build.mutation<AuthData, { identity_token: string; full_name?: { givenName?: string; familyName?: string } | null }>({
       query: (body) => ({ url: '/auth/apple', method: 'POST', body }),
+    }),
+    updateProfile: build.mutation<User, { name: string }>({
+      query: (body) => ({ url: '/auth/profile', method: 'PUT', body }),
+    }),
+    changePassword: build.mutation<{ success: true }, { currentPassword: string; newPassword: string }>({
+      query: (body) => ({ url: '/auth/password', method: 'PUT', body }),
     }),
 
     // --- Categories ---
@@ -181,6 +188,8 @@ export const {
   useRegisterMutation,
   useGoogleAuthMutation,
   useAppleAuthMutation,
+  useUpdateProfileMutation,
+  useChangePasswordMutation,
   useGetCategoriesQuery,
   useGetExpensesQuery,
   useCreateExpenseMutation,
