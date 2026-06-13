@@ -48,6 +48,12 @@ let DEMO_USER: User = {
   email: MOCK_CREDENTIALS.email,
 };
 let mockPassword = MOCK_CREDENTIALS.password;
+
+// Demo şifre sıfırlama: gerçek e-posta gönderilemediği için sabit bir kod kullanılır
+// (app-review/demo'da test edilebilsin). OTP ekranı mock oturumda bu kodu ipucu olarak gösterir.
+export const MOCK_OTP = "123456";
+const MOCK_RESET_TOKEN = "mock-reset-token.outflow.demo";
+let mockReset: { code: string; expires: number; attempts: number } | null = null;
 // Bu token'la giriş yapılan oturum = mock oturumu. Gerçek backend JWT'leri bununla
 // asla çakışmaz; bootstrap'ta token'ı görünce mock oturumu tekrar açabiliriz.
 export const MOCK_TOKEN = "mock-jwt-token.outflow.demo";
@@ -68,10 +74,12 @@ export function isMockSessionActive() {
 
 /** Girilen bilgiler demo hesabına mı ait? (login ekranı ve register'da kullanılır) */
 export function isMockCredentials(email: string, password: string) {
-  return (
-    email.trim().toLowerCase() === MOCK_CREDENTIALS.email &&
-    password === MOCK_CREDENTIALS.password
-  );
+  return isMockEmail(email) && password === MOCK_CREDENTIALS.password;
+}
+
+/** Yalnızca e-posta demo hesabına mı ait? (şifre gerektirmeyen akışlar, örn. şifremi unuttum) */
+export function isMockEmail(email: string) {
+  return email.trim().toLowerCase() === MOCK_CREDENTIALS.email;
 }
 
 // ---------------------------------------------------------------------------
@@ -901,6 +909,42 @@ export const mockBaseQuery: BaseQueryFn<
       return ok({ token: MOCK_TOKEN, user: DEMO_USER } satisfies AuthData);
     }
     return fail(400, "E-posta veya şifre hatalı");
+  }
+  if (path === "/auth/forgot-password" && method === "POST") {
+    // Demo: sabit kodu 5 dk geçerli olacak şekilde "gönder". Varlık sızdırmamak için her zaman ok.
+    mockReset = { code: MOCK_OTP, expires: Date.now() + 5 * 60_000, attempts: 0 };
+    return ok({ message: "Eğer bu e-posta kayıtlıysa, bir doğrulama kodu gönderildi." });
+  }
+  if (path === "/auth/verify-otp" && method === "POST") {
+    const code = String(body?.code ?? "");
+    if (!mockReset || Date.now() > mockReset.expires) {
+      mockReset = null;
+      return fail(400, "Kod geçersiz veya süresi dolmuş");
+    }
+    if (mockReset.attempts >= 5) {
+      mockReset = null;
+      return fail(400, "Çok fazla yanlış deneme. Lütfen yeni kod isteyin.");
+    }
+    if (code !== mockReset.code) {
+      mockReset.attempts += 1;
+      const remaining = 5 - mockReset.attempts;
+      if (remaining <= 0) {
+        mockReset = null;
+        return fail(400, "Çok fazla yanlış deneme. Lütfen yeni kod isteyin.");
+      }
+      return fail(400, `Kod hatalı. ${remaining} deneme hakkın kaldı.`);
+    }
+    mockReset = null;
+    return ok({ resetToken: MOCK_RESET_TOKEN });
+  }
+  if (path === "/auth/reset-password" && method === "POST") {
+    if (body?.resetToken !== MOCK_RESET_TOKEN) {
+      return fail(401, "Oturum süresi doldu. Lütfen baştan deneyin.");
+    }
+    const next = String(body?.newPassword ?? "");
+    if (next.length < 6) return fail(400, "Şifre en az 6 karakter olmalı");
+    mockPassword = next;
+    return ok({ message: "Şifren güncellendi" });
   }
   if (path === "/auth/profile" && method === "PUT") {
     const name = String(body?.name ?? "").trim();

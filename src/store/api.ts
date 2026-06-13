@@ -90,6 +90,15 @@ export const api = createApi({
     appleAuth: build.mutation<AuthData, { identity_token: string; full_name?: { givenName?: string; familyName?: string } | null }>({
       query: (body) => ({ url: '/auth/apple', method: 'POST', body }),
     }),
+    forgotPassword: build.mutation<{ message: string }, { email: string }>({
+      query: (body) => ({ url: '/auth/forgot-password', method: 'POST', body }),
+    }),
+    verifyOtp: build.mutation<{ resetToken: string }, { email: string; code: string }>({
+      query: (body) => ({ url: '/auth/verify-otp', method: 'POST', body }),
+    }),
+    resetPassword: build.mutation<{ message: string }, { resetToken: string; newPassword: string }>({
+      query: (body) => ({ url: '/auth/reset-password', method: 'POST', body }),
+    }),
     updateProfile: build.mutation<User, { name: string }>({
       query: (body) => ({ url: '/auth/profile', method: 'PUT', body }),
     }),
@@ -188,6 +197,9 @@ export const {
   useRegisterMutation,
   useGoogleAuthMutation,
   useAppleAuthMutation,
+  useForgotPasswordMutation,
+  useVerifyOtpMutation,
+  useResetPasswordMutation,
   useUpdateProfileMutation,
   useChangePasswordMutation,
   useGetCategoriesQuery,

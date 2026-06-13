@@ -155,6 +155,11 @@ export default function LoginScreen() {
             </Field>
           )}
         />
+        <View className="flex-row justify-end">
+          <Link href="/(auth)/forgot-password" className="text-sm font-medium text-accent">
+            Şifreni mi unuttun?
+          </Link>
+        </View>
       </View>
 
       <Button label="Giriş yap" onPress={onSubmit} loading={isLoading} />
