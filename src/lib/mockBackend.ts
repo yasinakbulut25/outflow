@@ -974,6 +974,10 @@ export const mockBaseQuery: BaseQueryFn<
   ) {
     return ok({ token: MOCK_TOKEN, user: DEMO_USER } satisfies AuthData);
   }
+  if (path === "/auth/account" && method === "DELETE") {
+    // Demo: gerçek veri yok; başarı dön. Oturum kapatma akışı çağıran tarafta yürür.
+    return ok({ success: true });
+  }
 
   // --- Categories ---
   if (path === "/categories" && method === "GET") return ok(CATEGORIES);

@@ -1,5 +1,13 @@
 import type { ExpoConfig } from 'expo/config';
 
+// expo-auth-session Google sağlayıcısı, iOS'ta OAuth dönüşü için ters çevrilmiş client ID
+// URL şemasını gerektirir (com.googleusercontent.apps.<id>). Şemayı env'deki iOS client
+// ID'sinden türetiyoruz ki .env değişince Info.plist ile (prebuild'de) senkron kalsın.
+const iosGoogleClientId = process.env.EXPO_PUBLIC_GOOGLE_IOS_CLIENT_ID ?? '';
+const googleReversedScheme = iosGoogleClientId
+  ? `com.googleusercontent.apps.${iosGoogleClientId.replace(/\.apps\.googleusercontent\.com$/, '')}`
+  : undefined;
+
 const config: ExpoConfig = {
   name: 'Outflow',
   slug: 'outflow',
@@ -14,6 +22,11 @@ const config: ExpoConfig = {
     bundleIdentifier: 'com.yasinakbulut.outflow',
     supportsTablet: false,
     usesAppleSignIn: true,
+    infoPlist: googleReversedScheme
+      ? {
+          CFBundleURLTypes: [{ CFBundleURLSchemes: [googleReversedScheme] }],
+        }
+      : undefined,
   },
   android: {
     package: 'com.outflow.app',

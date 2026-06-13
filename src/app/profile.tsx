@@ -1,39 +1,49 @@
-import { useState } from 'react';
-import { View, Pressable, Alert, ScrollView } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
-import { useRouter } from 'expo-router';
-import { ChevronLeft, LogOut } from 'lucide-react-native';
-import { Controller, useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { z } from 'zod';
-import { Text } from '@/components/ui/Text';
-import { Button } from '@/components/ui/Button';
-import { Card } from '@/components/ui/Card';
-import { Field } from '@/components/ui/Field';
-import { Input } from '@/components/ui/Input';
-import { Icon } from '@/components/ui/Icon';
-import { useAppDispatch, useAppSelector } from '@/store/hooks';
-import { signOut, updateUser } from '@/store/slices/authSlice';
-import { addToast } from '@/store/slices/uiSlice';
-import { useUpdateProfileMutation, useChangePasswordMutation } from '@/store/api';
-import { getErrorMessage } from '@/lib/apiError';
-import { LIMITS } from '@/lib/limits';
-import { colors } from '@/theme/tokens';
+import { Button } from "@/components/ui/Button";
+import { Card } from "@/components/ui/Card";
+import { Field } from "@/components/ui/Field";
+import { Icon } from "@/components/ui/Icon";
+import { Input } from "@/components/ui/Input";
+import { Text } from "@/components/ui/Text";
+import { getErrorMessage } from "@/lib/apiError";
+import { LIMITS } from "@/lib/limits";
+import {
+  useChangePasswordMutation,
+  useDeleteAccountMutation,
+  useUpdateProfileMutation,
+} from "@/store/api";
+import { useAppDispatch, useAppSelector } from "@/store/hooks";
+import { signOut, updateUser } from "@/store/slices/authSlice";
+import { addToast } from "@/store/slices/uiSlice";
+import { colors } from "@/theme/tokens";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useRouter } from "expo-router";
+import { ChevronLeft, LogOut, Trash2 } from "lucide-react-native";
+import { useState } from "react";
+import { Controller, useForm } from "react-hook-form";
+import { Alert, Pressable, ScrollView, View } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
+import { z } from "zod";
 
 const nameSchema = z.object({
-  name: z.string().trim().min(1, 'Ad gerekli').max(LIMITS.name, 'Ad çok uzun'),
+  name: z.string().trim().min(1, "Ad gerekli").max(LIMITS.name, "Ad çok uzun"),
 });
 type NameValues = z.infer<typeof nameSchema>;
 
 const passwordSchema = z
   .object({
-    currentPassword: z.string().min(1, 'Mevcut şifre gerekli').max(LIMITS.password, 'Şifre çok uzun'),
-    newPassword: z.string().min(6, 'En az 6 karakter').max(LIMITS.password, 'Şifre çok uzun'),
-    confirm: z.string().min(1, 'Yeni şifreyi tekrar gir'),
+    currentPassword: z
+      .string()
+      .min(1, "Mevcut şifre gerekli")
+      .max(LIMITS.password, "Şifre çok uzun"),
+    newPassword: z
+      .string()
+      .min(6, "En az 6 karakter")
+      .max(LIMITS.password, "Şifre çok uzun"),
+    confirm: z.string().min(1, "Yeni şifreyi tekrar gir"),
   })
   .refine((v) => v.newPassword === v.confirm, {
-    path: ['confirm'],
-    message: 'Şifreler eşleşmiyor',
+    path: ["confirm"],
+    message: "Şifreler eşleşmiyor",
   });
 type PasswordValues = z.infer<typeof passwordSchema>;
 
@@ -44,20 +54,26 @@ export default function ProfileScreen() {
   const [busy, setBusy] = useState(false);
 
   const [updateProfile, { isLoading: savingName }] = useUpdateProfileMutation();
-  const [changePassword, { isLoading: savingPassword }] = useChangePasswordMutation();
+  const [changePassword, { isLoading: savingPassword }] =
+    useChangePasswordMutation();
+  const [deleteAccount, { isLoading: deleting }] = useDeleteAccountMutation();
 
-  const name = user?.name?.trim() || 'Hesabım';
-  const email = user?.email?.trim() || '';
-  const initial = (user?.name?.trim()?.[0] ?? user?.email?.trim()?.[0] ?? '?').toUpperCase();
+  const name = user?.name?.trim() || "Hesabım";
+  const email = user?.email?.trim() || "";
+  const initial = (
+    user?.name?.trim()?.[0] ??
+    user?.email?.trim()?.[0] ??
+    "?"
+  ).toUpperCase();
 
   const nameForm = useForm<NameValues>({
     resolver: zodResolver(nameSchema),
-    defaultValues: { name: user?.name ?? '' },
+    defaultValues: { name: user?.name ?? "" },
   });
 
   const passwordForm = useForm<PasswordValues>({
     resolver: zodResolver(passwordSchema),
-    defaultValues: { currentPassword: '', newPassword: '', confirm: '' },
+    defaultValues: { currentPassword: "", newPassword: "", confirm: "" },
   });
 
   const onSaveName = nameForm.handleSubmit(async (values) => {
@@ -65,9 +81,9 @@ export default function ProfileScreen() {
       const updated = await updateProfile({ name: values.name }).unwrap();
       await dispatch(updateUser(updated)).unwrap();
       nameForm.reset({ name: updated.name ?? values.name });
-      dispatch(addToast('Adın güncellendi', 'success'));
+      dispatch(addToast("Adın güncellendi", "success"));
     } catch (err) {
-      dispatch(addToast(getErrorMessage(err, 'Ad güncellenemedi'), 'error'));
+      dispatch(addToast(getErrorMessage(err, "Ad güncellenemedi"), "error"));
     }
   });
 
@@ -77,30 +93,61 @@ export default function ProfileScreen() {
         currentPassword: values.currentPassword,
         newPassword: values.newPassword,
       }).unwrap();
-      passwordForm.reset({ currentPassword: '', newPassword: '', confirm: '' });
-      dispatch(addToast('Şifren güncellendi', 'success'));
+      passwordForm.reset({ currentPassword: "", newPassword: "", confirm: "" });
+      dispatch(addToast("Şifren güncellendi", "success"));
     } catch (err) {
-      dispatch(addToast(getErrorMessage(err, 'Şifre değiştirilemedi'), 'error'));
+      dispatch(
+        addToast(getErrorMessage(err, "Şifre değiştirilemedi"), "error"),
+      );
     }
   });
 
   const onLogout = () => {
-    Alert.alert('Çıkış yap', 'Oturumu kapatmak istediğine emin misin?', [
-      { text: 'Vazgeç', style: 'cancel' },
+    Alert.alert("Çıkış yap", "Oturumu kapatmak istediğine emin misin?", [
+      { text: "Vazgeç", style: "cancel" },
       {
-        text: 'Çıkış yap',
-        style: 'destructive',
+        text: "Çıkış yap",
+        style: "destructive",
         onPress: async () => {
           setBusy(true);
           await dispatch(signOut());
-          router.replace('/(auth)/login');
+          router.replace("/(auth)/login");
         },
       },
     ]);
   };
 
+  const onDeleteAccount = () => {
+    Alert.alert(
+      "Hesabı sil",
+      "Hesabın ve tüm verilerin (harcamalar, gelirler, tekrarlayan kayıtlar) kalıcı olarak silinecek. Bu işlem geri alınamaz.",
+      [
+        { text: "Vazgeç", style: "cancel" },
+        {
+          text: "Hesabı sil",
+          style: "destructive",
+          onPress: async () => {
+            try {
+              await deleteAccount().unwrap();
+              await dispatch(signOut());
+              router.replace("/(auth)/login");
+              dispatch(addToast("Hesabın silindi", "success"));
+            } catch (err) {
+              dispatch(
+                addToast(getErrorMessage(err, "Hesap silinemedi"), "error"),
+              );
+            }
+          },
+        },
+      ],
+    );
+  };
+
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: colors.background }} edges={['top']}>
+    <SafeAreaView
+      style={{ flex: 1, backgroundColor: colors.background }}
+      edges={["top"]}
+    >
       <View className="flex-row items-center gap-2 px-4 py-3">
         <Pressable
           onPress={() => router.back()}
@@ -124,9 +171,13 @@ export default function ProfileScreen() {
             <Text variant="h2">{initial}</Text>
           </View>
           <View className="flex-1">
-            <Text variant="h2" numberOfLines={1}>{name}</Text>
+            <Text variant="h2" numberOfLines={1}>
+              {name}
+            </Text>
             {email ? (
-              <Text variant="muted" numberOfLines={1} className="mt-0.5">{email}</Text>
+              <Text variant="muted" numberOfLines={1} className="mt-0.5">
+                {email}
+              </Text>
             ) : null}
           </View>
         </Card>
@@ -152,7 +203,11 @@ export default function ProfileScreen() {
               </Field>
             )}
           />
-          <Button label="Adı kaydet" onPress={onSaveName} loading={savingName} />
+          <Button
+            label="Adı kaydet"
+            onPress={onSaveName}
+            loading={savingName}
+          />
         </View>
 
         <View className="gap-3">
@@ -161,7 +216,10 @@ export default function ProfileScreen() {
             control={passwordForm.control}
             name="currentPassword"
             render={({ field: { onChange, onBlur, value } }) => (
-              <Field label="Mevcut şifre" error={passwordForm.formState.errors.currentPassword?.message}>
+              <Field
+                label="Mevcut şifre"
+                error={passwordForm.formState.errors.currentPassword?.message}
+              >
                 <Input
                   value={value}
                   onChangeText={onChange}
@@ -180,7 +238,10 @@ export default function ProfileScreen() {
             control={passwordForm.control}
             name="newPassword"
             render={({ field: { onChange, onBlur, value } }) => (
-              <Field label="Yeni şifre" error={passwordForm.formState.errors.newPassword?.message}>
+              <Field
+                label="Yeni şifre"
+                error={passwordForm.formState.errors.newPassword?.message}
+              >
                 <Input
                   value={value}
                   onChangeText={onChange}
@@ -199,7 +260,10 @@ export default function ProfileScreen() {
             control={passwordForm.control}
             name="confirm"
             render={({ field: { onChange, onBlur, value } }) => (
-              <Field label="Yeni şifre (tekrar)" error={passwordForm.formState.errors.confirm?.message}>
+              <Field
+                label="Yeni şifre (tekrar)"
+                error={passwordForm.formState.errors.confirm?.message}
+              >
                 <Input
                   value={value}
                   onChangeText={onChange}
@@ -230,6 +294,23 @@ export default function ProfileScreen() {
           onPress={onLogout}
           loading={busy}
         />
+
+        <View className="mt-2 gap-3 border-t border-border pt-6">
+          <Text variant="label" style={{ color: colors.danger }}>
+            Tehlikeli bölge
+          </Text>
+          <Text variant="muted">
+            Hesabını silersen tüm verilerin kalıcı olarak kaldırılır. Bu işlem
+            geri alınamaz.
+          </Text>
+          <Button
+            label="Hesabı sil"
+            variant="danger"
+            leftIcon={Trash2}
+            onPress={onDeleteAccount}
+            loading={deleting}
+          />
+        </View>
       </ScrollView>
     </SafeAreaView>
   );

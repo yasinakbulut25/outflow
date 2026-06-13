@@ -105,6 +105,9 @@ export const api = createApi({
     changePassword: build.mutation<{ success: true }, { currentPassword: string; newPassword: string }>({
       query: (body) => ({ url: '/auth/password', method: 'PUT', body }),
     }),
+    deleteAccount: build.mutation<{ success: true }, void>({
+      query: () => ({ url: '/auth/account', method: 'DELETE' }),
+    }),
 
     // --- Categories ---
     getCategories: build.query<Category[], void>({
@@ -202,6 +205,7 @@ export const {
   useResetPasswordMutation,
   useUpdateProfileMutation,
   useChangePasswordMutation,
+  useDeleteAccountMutation,
   useGetCategoriesQuery,
   useGetExpensesQuery,
   useCreateExpenseMutation,
