@@ -27,7 +27,14 @@ export interface MonthGroup {
 
 /** Bir harcamanın bu listedeki gösterim tarihini döndürür (taksit ayı varsa onu kullanır). */
 function displayDate(e: Expense): string {
-  if (e.installment_display_month) return `${e.installment_display_month}-01`;
+  if (e.installment_display_month) {
+    // Alış gününü taksit ayına taşı; kısa aylarda son güne kırp (ör. 31 → Şubat 28/29).
+    const [y, m] = e.installment_display_month.split('-').map(Number);
+    const purchaseDay = Number(e.expense_date.slice(8, 10)) || 1;
+    const maxDay = new Date(y, m, 0).getDate();
+    const day = Math.min(purchaseDay, maxDay);
+    return `${e.installment_display_month}-${String(day).padStart(2, '0')}`;
+  }
   return e.expense_date.slice(0, 10);
 }
 
