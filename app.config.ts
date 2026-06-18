@@ -22,14 +22,19 @@ const config: ExpoConfig = {
     bundleIdentifier: 'com.yasinakbulut.outflow',
     supportsTablet: false,
     usesAppleSignIn: true,
-    infoPlist: googleReversedScheme
-      ? {
-          CFBundleURLTypes: [{ CFBundleURLSchemes: [googleReversedScheme] }],
-        }
-      : undefined,
+    infoPlist: {
+      // Yalnızca standart HTTPS kullanılıyor → ihracat uyumluluğu sorusunu otomatik "Hayır" yapar.
+      ITSAppUsesNonExemptEncryption: false,
+      // Uygulama Türkçe → App Store'un dili "EN" yerine "Türkçe" göstermesi için yerelleştirmeyi beyan et.
+      CFBundleDevelopmentRegion: 'tr',
+      CFBundleLocalizations: ['tr'],
+      ...(googleReversedScheme
+        ? { CFBundleURLTypes: [{ CFBundleURLSchemes: [googleReversedScheme] }] }
+        : {}),
+    },
   },
   android: {
-    package: 'com.outflow.app',
+    package: 'com.yasinakbulut.outflow',
     adaptiveIcon: {
       backgroundColor: '#E6F4FE',
       foregroundImage: './assets/images/android-icon-foreground.png',
