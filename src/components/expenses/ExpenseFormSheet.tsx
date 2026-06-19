@@ -8,12 +8,12 @@ import { Text } from "@/components/ui/Text";
 import { getErrorMessage } from "@/lib/apiError";
 import { categoryIcon } from "@/lib/categoryIcons";
 import { cn } from "@/lib/cn";
-import { LIMITS } from "@/lib/limits";
 import {
   calculateInstallmentAmount,
   formatCurrency,
   formatDate,
 } from "@/lib/formatters";
+import { LIMITS } from "@/lib/limits";
 import {
   useCreateExpenseMutation,
   useDeleteExpenseMutation,
@@ -149,9 +149,17 @@ export const ExpenseFormSheet = forwardRef<
     setItems((prev) =>
       prev.map((it) => (it.key === key ? { ...it, ...patch } : it)),
     );
+  // Son kalemin fiyatı girilmeden yeni kalem eklenemez (fiyat zorunlu alan).
+  const lastItemFilled = (items.at(-1)?.amount ?? 0) > 0;
   const addItem = () => {
     if (items.length >= LIMITS.maxItems) {
-      dispatch(addToast(`En fazla ${LIMITS.maxItems} kalem ekleyebilirsin`, "warning"));
+      dispatch(
+        addToast(`En fazla ${LIMITS.maxItems} kalem ekleyebilirsin`, "warning"),
+      );
+      return;
+    }
+    if (!lastItemFilled) {
+      dispatch(addToast("Önce bu kalemin fiyatını gir", "warning"));
       return;
     }
     const row = newRow();
@@ -376,10 +384,16 @@ export const ExpenseFormSheet = forwardRef<
 
         <View className="gap-2">
           <View className="flex-row items-center justify-between">
-            <Text variant="label">Kalemler</Text>
+            <View>
+              <Text variant="label">Kalemler & Tutar</Text>
+            </View>
             <Pressable
               onPress={addItem}
-              className="flex-row items-center gap-1 active:opacity-60"
+              disabled={!lastItemFilled}
+              className={cn(
+                "flex-row items-center gap-1 active:opacity-60",
+                !lastItemFilled && "opacity-30",
+              )}
             >
               <Icon icon={Plus} size={16} color={colors.accent} />
               <Text className="text-sm font-medium text-accent">Ekle</Text>
@@ -392,12 +406,13 @@ export const ExpenseFormSheet = forwardRef<
                 value={it.name}
                 onChangeText={(t) => updateItem(it.key, { name: t })}
                 maxLength={LIMITS.itemName}
-                placeholder="Kalem adı"
+                placeholder="Kalem adı (opsiyonel)"
                 className="flex-1"
               />
               <CurrencyInput
                 value={it.amount}
                 onChangeValue={(v) => updateItem(it.key, { amount: v })}
+                invalid={!it.name.trim() ? false : it.amount <= 0}
                 className="w-28"
               />
               <Pressable
