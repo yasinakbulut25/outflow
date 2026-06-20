@@ -23,13 +23,16 @@ export function SavingsCard({ saving, onPress }: { saving: Expense; onPress?: (e
 
           <View className="flex-1">
             <Text variant="body" className="font-medium" numberOfLines={1}>{saving.title}</Text>
-            <Text variant="muted" className="capitalize">{formatDate(saving.expense_date)}</Text>
+            <Text variant="muted" className="capitalize" numberOfLines={1}>{formatDate(saving.expense_date)}</Text>
           </View>
 
-          <View className="items-end gap-0.5">
-            {quantity ? <Text variant="body" className="font-semibold">{quantity}</Text> : null}
+          {/* max-w + numberOfLines: uzun miktar değeri kartı taşırmasın, sağda kırpılsın */}
+          <View className="max-w-[45%] items-end gap-0.5">
+            {quantity ? (
+              <Text variant="body" className="font-semibold" numberOfLines={1}>{quantity}</Text>
+            ) : null}
             {hasValue ? (
-              <Text variant="muted" className="text-xs">≈ {formatCurrency(saving.total_amount)} ₺</Text>
+              <Text variant="muted" className="text-xs" numberOfLines={1}>≈ {formatCurrency(saving.total_amount)} ₺</Text>
             ) : null}
           </View>
         </View>
