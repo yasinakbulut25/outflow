@@ -11,7 +11,7 @@ const googleReversedScheme = iosGoogleClientId
 const config: ExpoConfig = {
   name: 'Outflow',
   slug: 'outflow',
-  version: '1.0.1',
+  version: '1.0.2',
   owner: 'yasinakbulut',
   orientation: 'portrait',
   icon: './assets/images/icon.png',
