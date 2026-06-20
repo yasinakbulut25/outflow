@@ -7,9 +7,13 @@ import { MOCK_TOKEN, enableMockSession, disableMockSession } from '@/lib/mockBac
 interface AuthState {
   user: User | null;
   hydrated: boolean; // başlangıç token okuması tamamlandı mı
+  // Yeni kayıt sonrası eklenen örnek verileri tanıtan onboarding modalı gösterilsin mi.
+  // Geçici: yalnızca kayıt anındaki signIn ile set edilir, kullanıcı kapatınca sıfırlanır;
+  // saklanmaz (yeniden açılışta tekrar gösterilmez).
+  showOnboarding: boolean;
 }
 
-const initialState: AuthState = { user: null, hydrated: false };
+const initialState: AuthState = { user: null, hydrated: false, showOnboarding: false };
 
 /** Uygulama açılışında: saklı token + kullanıcı varsa oturumu kur. */
 export const bootstrapAuth = createAsyncThunk('auth/bootstrap', async () => {
@@ -46,6 +50,8 @@ const authSlice = createSlice({
   reducers: {
     // 401 auto-logout: api.ts tarafından dispatch edilir (circular import olmadan).
     logout: (state) => { state.user = null; },
+    // Onboarding modalı: yalnızca kullanıcının bilinçli kapatmasıyla kapanır.
+    dismissOnboarding: (state) => { state.showOnboarding = false; },
   },
   extraReducers: (builder) => {
     builder
@@ -58,14 +64,18 @@ const authSlice = createSlice({
       })
       .addCase(signIn.fulfilled, (state, action) => {
         state.user = action.payload;
+        // Yeni kullanıcıysa onboarding modalını tetikle (arg = signIn'e verilen AuthData).
+        state.showOnboarding = action.meta.arg.isNewUser === true;
       })
       .addCase(updateUser.fulfilled, (state, action) => {
         state.user = action.payload;
       })
       .addCase(signOut.fulfilled, (state) => {
         state.user = null;
+        state.showOnboarding = false;
       });
   },
 });
 
+export const { dismissOnboarding } = authSlice.actions;
 export default authSlice.reducer;

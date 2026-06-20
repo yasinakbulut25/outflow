@@ -2,6 +2,7 @@ import { Redirect, Tabs } from 'expo-router';
 import { Wallet, TrendingUp, HandCoins, BarChart3, Repeat } from 'lucide-react-native';
 import { useAppSelector } from '@/store/hooks';
 import { TopBar } from '@/components/ui/TopBar';
+import { OnboardingModal } from '@/components/onboarding/OnboardingModal';
 import { colors } from '@/theme/tokens';
 
 export default function TabsLayout() {
@@ -19,6 +20,7 @@ export default function TabsLayout() {
   };
 
   return (
+    <>
     <Tabs
       screenOptions={{
         headerShown: true,
@@ -69,5 +71,7 @@ export default function TabsLayout() {
         }}
       />
     </Tabs>
+    <OnboardingModal />
+    </>
   );
 }

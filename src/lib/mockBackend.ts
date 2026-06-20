@@ -977,7 +977,7 @@ export const mockBaseQuery: BaseQueryFn<
       name: body?.name ?? "Yeni Kullanıcı",
       hasPassword: true,
     };
-    return ok({ token: MOCK_TOKEN, user } satisfies AuthData);
+    return ok({ token: MOCK_TOKEN, user, isNewUser: true } satisfies AuthData);
   }
   if (
     (path === "/auth/google" || path === "/auth/apple") &&

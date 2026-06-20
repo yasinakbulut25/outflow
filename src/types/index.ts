@@ -19,6 +19,9 @@ export interface User {
 export interface AuthData {
   token: string;
   user: User;
+  // Sunucu yeni kayıt (register / ilk sosyal giriş) için true döner. İlk girişte
+  // örnek verileri tanıtan onboarding modalını tetiklemek için kullanılır.
+  isNewUser?: boolean;
 }
 
 export interface Category {
