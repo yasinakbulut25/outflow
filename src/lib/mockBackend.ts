@@ -46,6 +46,16 @@ let DEMO_USER: User = {
   id: 1,
   name: "Yasin Akbulut",
   email: MOCK_CREDENTIALS.email,
+  hasPassword: true,
+};
+
+// Google/Apple ile giren demo kullanıcısı: uygulama içi şifresi yok → profil
+// ekranında şifre değiştirme bölümü gizlenir.
+const DEMO_OAUTH_USER: User = {
+  id: 2,
+  name: "Yasin Akbulut",
+  email: "demo@gmail.com",
+  hasPassword: false,
 };
 let mockPassword = MOCK_CREDENTIALS.password;
 
@@ -965,6 +975,7 @@ export const mockBaseQuery: BaseQueryFn<
       id: 1,
       email: String(body?.email ?? "").trim(),
       name: body?.name ?? "Yeni Kullanıcı",
+      hasPassword: true,
     };
     return ok({ token: MOCK_TOKEN, user } satisfies AuthData);
   }
@@ -972,7 +983,7 @@ export const mockBaseQuery: BaseQueryFn<
     (path === "/auth/google" || path === "/auth/apple") &&
     method === "POST"
   ) {
-    return ok({ token: MOCK_TOKEN, user: DEMO_USER } satisfies AuthData);
+    return ok({ token: MOCK_TOKEN, user: DEMO_OAUTH_USER } satisfies AuthData);
   }
   if (path === "/auth/account" && method === "DELETE") {
     // Demo: gerçek veri yok; başarı dön. Oturum kapatma akışı çağıran tarafta yürür.

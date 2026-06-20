@@ -17,7 +17,7 @@ import { addToast } from "@/store/slices/uiSlice";
 import { colors } from "@/theme/tokens";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "expo-router";
-import { ChevronLeft, LogOut, Trash2 } from "lucide-react-native";
+import { ChevronLeft, LogOut, ShieldCheck, Trash2 } from "lucide-react-native";
 import { useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { Alert, Pressable, ScrollView, View } from "react-native";
@@ -60,6 +60,9 @@ export default function ProfileScreen() {
 
   const name = user?.name?.trim() || "Hesabım";
   const email = user?.email?.trim() || "";
+  // Google/Apple ile giren kullanıcıların uygulama içi şifresi yok → şifre
+  // değiştirme bölümünü gizle. Alan yoksa (eski backend) şifresi var kabul edilir.
+  const canChangePassword = user?.hasPassword !== false;
   const initial = (
     user?.name?.trim()?.[0] ??
     user?.email?.trim()?.[0] ??
@@ -210,6 +213,19 @@ export default function ProfileScreen() {
           />
         </View>
 
+        {!canChangePassword ? (
+          <View className="gap-3">
+            <Text variant="label">Şifre</Text>
+            <Card className="flex-row items-start gap-3">
+              <Icon icon={ShieldCheck} size={20} color={colors.muted} />
+              <Text variant="muted" className="flex-1">
+                Hesabın Google veya Apple ile bağlı olduğundan uygulama içinde
+                ayrı bir şifren yok. Giriş yöntemini bağlı olduğun hesap üzerinden
+                yönetebilirsin.
+              </Text>
+            </Card>
+          </View>
+        ) : (
         <View className="gap-3">
           <Text variant="label">Şifre değiştir</Text>
           <Controller
@@ -286,6 +302,7 @@ export default function ProfileScreen() {
             loading={savingPassword}
           />
         </View>
+        )}
 
         <Button
           label="Çıkış yap"

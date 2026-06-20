@@ -10,6 +10,10 @@ export interface User {
   id: number;
   email: string | null;
   name?: string | null;
+  // Kullanıcının uygulama içi (e-posta+şifre) bir parolası var mı?
+  // Google/Apple ile giren kullanıcılarda false olur → profil ekranında şifre
+  // değiştirme bölümü gizlenir. Alan yoksa (eski backend) "var" kabul edilir.
+  hasPassword?: boolean;
 }
 
 export interface AuthData {
