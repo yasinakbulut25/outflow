@@ -8,6 +8,12 @@ export function formatCurrency(value: number): string {
   }).format(value);
 }
 
+/** Gider gösterimi: pozitif tutarın başına eksi koyar (-1.250) — paranın çıktığı/eksildiği
+ *  net anlaşılsın diye. Yalnızca UI gösterimi içindir; saklanan değer pozitif kalır. */
+export function formatExpense(value: number): string {
+  return value > 0 ? `-${formatCurrency(value)}` : formatCurrency(value);
+}
+
 /** Girdi: yalnız rakam → sayı. Son 2 hane kuruş. "425000" → 4250.00 */
 export function parseCurrencyInput(rawDigits: string): number {
   if (!rawDigits) return 0;

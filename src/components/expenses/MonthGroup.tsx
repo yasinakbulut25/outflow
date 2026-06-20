@@ -11,7 +11,7 @@ import { Text } from '@/components/ui/Text';
 import { Icon } from '@/components/ui/Icon';
 import { cn } from '@/lib/cn';
 import { colors } from '@/theme/tokens';
-import { getMonthName, formatCurrency } from '@/lib/formatters';
+import { getMonthName, formatCurrency, formatExpense } from '@/lib/formatters';
 import { DayGroup } from './DayGroup';
 import { ExpenseCard } from './ExpenseCard';
 import { SavingsCard } from '@/components/savings/SavingsCard';
@@ -51,7 +51,7 @@ function RecurringSection({ group, onPressRecurring }: { group: MonthGroupModel;
           <Text variant="body" className="font-medium">Düzenli Ödemeler</Text>
           <Text variant="muted">{group.recurring.length} ödeme</Text>
         </View>
-        <Text variant="mono" style={{ color: PURPLE }}>{formatCurrency(group.recurringAmount)} ₺</Text>
+        <Text variant="mono" style={{ color: PURPLE }}>{formatExpense(group.recurringAmount)} ₺</Text>
         <Animated.View style={chevronStyle}>
           <Icon icon={ChevronDown} size={18} color={PURPLE} />
         </Animated.View>
@@ -132,20 +132,20 @@ export function MonthGroup({ group, defaultExpanded = false, onPressExpense, onP
           <Text variant="h2">{getMonthName(group.month)}</Text>
           <View className="mt-0.5 flex-row flex-wrap gap-x-3">
             {group.cashAmount > 0 ? (
-              <Text variant="muted">Peşin {formatCurrency(group.cashAmount)} ₺</Text>
+              <Text variant="muted">Peşin {formatExpense(group.cashAmount)} ₺</Text>
             ) : null}
             {group.installmentAmount > 0 ? (
-              <Text variant="muted">Taksit {formatCurrency(group.installmentAmount)} ₺</Text>
+              <Text variant="muted">Taksit {formatExpense(group.installmentAmount)} ₺</Text>
             ) : null}
             {group.recurringAmount > 0 ? (
-              <Text variant="muted" style={{ color: PURPLE }}>Düzenli {formatCurrency(group.recurringAmount)} ₺</Text>
+              <Text variant="muted" style={{ color: PURPLE }}>Düzenli {formatExpense(group.recurringAmount)} ₺</Text>
             ) : null}
             {group.savingsAmount > 0 ? (
               <Text variant="muted" style={{ color: EMERALD }}>Birikim ≈ {formatCurrency(group.savingsAmount)} ₺</Text>
             ) : null}
           </View>
         </View>
-        <Text variant="mono" className="text-lg">{formatCurrency(group.totalAmount)} ₺</Text>
+        <Text variant="mono" className="text-lg">{formatExpense(group.totalAmount)} ₺</Text>
         <Animated.View style={chevronStyle}>
           <Icon icon={ChevronDown} size={20} color={colors.muted} />
         </Animated.View>

@@ -2,7 +2,7 @@ import { View } from 'react-native';
 import { TrendingUp, TrendingDown, Wallet } from 'lucide-react-native';
 import { Text } from '@/components/ui/Text';
 import { Icon } from '@/components/ui/Icon';
-import { formatCurrency } from '@/lib/formatters';
+import { formatCurrency, formatExpense } from '@/lib/formatters';
 
 const TEAL = '#16a34a';
 const RED = '#ef4444';
@@ -12,11 +12,13 @@ function StatCard({
   value,
   color,
   icon,
+  negative = false,
 }: {
   label: string;
   value: number;
   color: string;
   icon: typeof TrendingUp;
+  negative?: boolean;
 }) {
   return (
     <View className="flex-1 rounded-2xl border border-border bg-white p-3">
@@ -25,7 +27,7 @@ function StatCard({
       </View>
       <Text variant="muted" className="text-xs">{label}</Text>
       <Text variant="mono" className="mt-0.5 text-lg font-bold" style={{ color }} numberOfLines={1}>
-        {formatCurrency(value)} ₺
+        {negative ? formatExpense(value) : formatCurrency(value)} ₺
       </Text>
     </View>
   );
@@ -68,7 +70,7 @@ export function SummaryCards({
 
       <View className="flex-row gap-2">
         <StatCard label="Toplam Gelir" value={summary.total_income} color={TEAL} icon={TrendingUp} />
-        <StatCard label="Toplam Gider" value={summary.total_expense} color={RED} icon={TrendingDown} />
+        <StatCard label="Toplam Gider" value={summary.total_expense} color={RED} icon={TrendingDown} negative />
       </View>
     </View>
   );

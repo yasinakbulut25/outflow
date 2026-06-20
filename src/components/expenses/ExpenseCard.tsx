@@ -5,7 +5,7 @@ import { Icon } from '@/components/ui/Icon';
 import { Badge } from '@/components/ui/Badge';
 import { categoryIcon } from '@/lib/categoryIcons';
 import { displayAmount } from '@/lib/groupExpenses';
-import { formatCurrency } from '@/lib/formatters';
+import { formatExpense } from '@/lib/formatters';
 import { ExpenseItems } from './ExpenseItems';
 import { InstallmentTimeline } from './InstallmentTimeline';
 import type { Expense } from '@/types';
@@ -42,7 +42,7 @@ export function ExpenseCard({ expense, onPress }: { expense: Expense; onPress?: 
           </View>
 
           <View className="items-end gap-1">
-            <Text variant="mono">{formatCurrency(amount)} ₺</Text>
+            <Text variant="mono">{formatExpense(amount)} ₺</Text>
             {isRecurring ? (
               <Badge label="Düzenli" tone="neutral" />
             ) : (

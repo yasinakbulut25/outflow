@@ -1,7 +1,7 @@
 import { View } from 'react-native';
 import { Text } from '@/components/ui/Text';
 import { cn } from '@/lib/cn';
-import { formatCurrency, calculateInstallmentAmount } from '@/lib/formatters';
+import { formatExpense, calculateInstallmentAmount } from '@/lib/formatters';
 import type { Expense } from '@/types';
 
 // Taksitli harcamada ilerleme: kaçıncı taksit / toplam + aylık tutar.
@@ -18,7 +18,7 @@ export function InstallmentTimeline({ expense }: { expense: Expense }) {
         <Text variant="muted">
           {current > 0 ? `${current}/${count}. taksit` : `${count} taksit`}
         </Text>
-        <Text variant="muted">{formatCurrency(monthly)} ₺/ay</Text>
+        <Text variant="muted">{formatExpense(monthly)} ₺/ay</Text>
       </View>
       <View className="flex-row gap-1">
         {Array.from({ length: count }, (_, i) => (

@@ -2,7 +2,7 @@ import { View } from 'react-native';
 import { ArrowUpRight, ArrowDownRight } from 'lucide-react-native';
 import { Text } from '@/components/ui/Text';
 import { Icon } from '@/components/ui/Icon';
-import { getMonthName, formatCurrency } from '@/lib/formatters';
+import { getMonthName, formatCurrency, formatExpense } from '@/lib/formatters';
 import type { MonthlyNet } from '@/types';
 
 const TEAL = '#16a34a';
@@ -35,7 +35,7 @@ export function NetList({ data }: { data: MonthlyNet[] }) {
               </View>
               <View className="flex-row items-center gap-0.5">
                 <Icon icon={ArrowDownRight} size={13} color={RED} />
-                <Text className="text-xs" style={{ color: RED }} numberOfLines={1}>{formatCurrency(d.expense)}</Text>
+                <Text className="text-xs" style={{ color: RED }} numberOfLines={1}>{formatExpense(d.expense)}</Text>
               </View>
             </View>
             <View className="rounded-full px-2 py-1" style={{ backgroundColor: color + '14' }}>
