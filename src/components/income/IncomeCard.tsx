@@ -4,12 +4,14 @@ import { Card } from '@/components/ui/Card';
 import { Text } from '@/components/ui/Text';
 import { Icon } from '@/components/ui/Icon';
 import { Badge } from '@/components/ui/Badge';
-import { formatCurrency, formatDate } from '@/lib/formatters';
+import { useTranslation, useFormat } from '@/i18n';
 import type { Income } from '@/types';
 
 const TEAL = '#16a34a';
 
 export function IncomeCard({ income, onPress }: { income: Income; onPress?: (i: Income) => void }) {
+  const { t } = useTranslation();
+  const fmt = useFormat();
   const isRecurring = !!income.recurring_income_id;
   const TypeIcon = isRecurring ? Repeat : TrendingUp;
 
@@ -23,12 +25,12 @@ export function IncomeCard({ income, onPress }: { income: Income; onPress?: (i: 
 
           <View className="flex-1">
             <Text variant="body" className="font-medium" numberOfLines={1}>{income.title}</Text>
-            <Text variant="muted" className="capitalize">{formatDate(income.income_date)}</Text>
+            <Text variant="muted" className="capitalize">{fmt.date(income.income_date)}</Text>
           </View>
 
           <View className="items-end gap-1">
-            <Text variant="mono" style={{ color: TEAL }}>{formatCurrency(income.amount)} ₺</Text>
-            <Badge label={isRecurring ? 'Düzenli' : 'Tek seferlik'} tone="neutral" />
+            <Text variant="mono" style={{ color: TEAL }}>{fmt.money(income.amount)}</Text>
+            <Badge label={isRecurring ? t('income.recurring') : t('income.oneTime')} tone="neutral" />
           </View>
         </View>
       </Card>

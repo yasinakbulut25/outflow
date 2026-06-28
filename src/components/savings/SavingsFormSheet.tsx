@@ -10,7 +10,7 @@ import { Icon } from '@/components/ui/Icon';
 import { CurrencyInput } from '@/components/ui/CurrencyInput';
 import { DatePicker } from '@/components/ui/DatePicker';
 import { colors } from '@/theme/tokens';
-import { formatDate } from '@/lib/formatters';
+import { useTranslation, useFormat } from '@/i18n';
 import { BIRIKIM_CATEGORY_ID } from '@/lib/categoryIcons';
 import { useAppDispatch } from '@/store/hooks';
 import { addToast } from '@/store/slices/uiSlice';
@@ -37,6 +37,8 @@ function toISODate(d: Date): string {
 export const SavingsFormSheet = forwardRef<SavingsFormSheetRef>((_props, ref) => {
   const sheetRef = useRef<BottomSheetModal>(null);
   const dispatch = useAppDispatch();
+  const { t } = useTranslation();
+  const fmt = useFormat();
   const [createExpense, { isLoading: creating }] = useCreateExpenseMutation();
   const [updateExpense, { isLoading: updating }] = useUpdateExpenseMutation();
   const [deleteExpense, { isLoading: deleting }] = useDeleteExpenseMutation();
@@ -74,8 +76,8 @@ export const SavingsFormSheet = forwardRef<SavingsFormSheetRef>((_props, ref) =>
   const close = () => sheetRef.current?.dismiss();
 
   const onSave = async () => {
-    if (!title.trim()) return dispatch(addToast('Ne biriktirdin?', 'warning'));
-    if (!quantity.trim()) return dispatch(addToast('Ne kadar biriktirdin?', 'warning'));
+    if (!title.trim()) return dispatch(addToast(t('savings.form.whatRequired'), 'warning'));
+    if (!quantity.trim()) return dispatch(addToast(t('savings.form.howMuchRequired'), 'warning'));
 
     const payload: CreateExpensePayload = {
       title: title.trim(),
@@ -89,31 +91,31 @@ export const SavingsFormSheet = forwardRef<SavingsFormSheetRef>((_props, ref) =>
     try {
       if (editing) {
         await updateExpense({ id: editing.id, body: payload }).unwrap();
-        dispatch(addToast('Birikim güncellendi'));
+        dispatch(addToast(t('savings.form.updated')));
       } else {
         await createExpense(payload).unwrap();
-        dispatch(addToast('Birikim eklendi'));
+        dispatch(addToast(t('savings.form.added')));
       }
       close();
     } catch (err) {
-      dispatch(addToast(getErrorMessage(err, 'Kaydedilemedi'), 'error'));
+      dispatch(addToast(getErrorMessage(err, t('common.saveFailed')), 'error'));
     }
   };
 
   const onDelete = () => {
     if (!editing) return;
-    Alert.alert('Birikimi sil', `"${editing.title}" silinsin mi?`, [
-      { text: 'Vazgeç', style: 'cancel' },
+    Alert.alert(t('savings.form.deleteTitle'), t('common.deleteConfirm', { title: editing.title }), [
+      { text: t('common.cancel'), style: 'cancel' },
       {
-        text: 'Sil',
+        text: t('common.delete'),
         style: 'destructive',
         onPress: async () => {
           try {
             await deleteExpense(editing.id).unwrap();
-            dispatch(addToast('Birikim silindi'));
+            dispatch(addToast(t('savings.form.deleted')));
             close();
           } catch (err) {
-            dispatch(addToast(getErrorMessage(err, 'Silinemedi'), 'error'));
+            dispatch(addToast(getErrorMessage(err, t('common.deleteFailed')), 'error'));
           }
         },
       },
@@ -143,30 +145,30 @@ export const SavingsFormSheet = forwardRef<SavingsFormSheetRef>((_props, ref) =>
     >
       <BottomSheetScrollView contentContainerClassName="gap-4 px-4 pb-10" keyboardShouldPersistTaps="handled">
         <View className="flex-row items-center justify-between">
-          <Text variant="h2">{editing ? 'Birikimi düzenle' : 'Yeni birikim'}</Text>
-          <Pressable onPress={close} hitSlop={8} accessibilityRole="button" accessibilityLabel="Kapat" className="p-1 active:opacity-60">
+          <Text variant="h2">{editing ? t('savings.form.edit') : t('savings.form.create')}</Text>
+          <Pressable onPress={close} hitSlop={8} accessibilityRole="button" accessibilityLabel={t("a11y.close")} className="p-1 active:opacity-60">
             <Icon icon={X} size={22} color={colors.muted} />
           </Pressable>
         </View>
 
-        <Field label="Ne biriktirdin?">
-          <Input bottomSheet value={title} onChangeText={setTitle} maxLength={LIMITS.title} placeholder="Örn. Altın, Dolar, Nakit" />
+        <Field label={t("savings.form.what")}>
+          <Input bottomSheet value={title} onChangeText={setTitle} maxLength={LIMITS.title} placeholder={t("savings.form.whatPlaceholder")} />
         </Field>
 
-        <Field label="Ne kadar?">
-          <Input bottomSheet value={quantity} onChangeText={setQuantity} maxLength={LIMITS.savingsQuantity} placeholder="Örn. 1500, 40 gr" />
+        <Field label={t("savings.form.howMuch")}>
+          <Input bottomSheet value={quantity} onChangeText={setQuantity} maxLength={LIMITS.savingsQuantity} placeholder={t("savings.form.howMuchPlaceholder")} />
         </Field>
 
-        <Field label="Yaklaşık değer (₺) — opsiyonel">
+        <Field label={t("savings.form.approxValue", { symbol: fmt.symbol })}>
           <CurrencyInput value={amount} onChangeValue={setAmount} />
         </Field>
 
-        <Field label="Tarih">
+        <Field label={t("savings.form.date")}>
           <Pressable
             onPress={() => setShowDatePicker(true)}
             className="rounded-xl border border-border bg-white px-3 py-3 active:opacity-70"
           >
-            <Text variant="body" className="capitalize">{formatDate(toISODate(date))}</Text>
+            <Text variant="body" className="capitalize">{fmt.date(toISODate(date))}</Text>
           </Pressable>
         </Field>
         <DatePicker
@@ -176,9 +178,9 @@ export const SavingsFormSheet = forwardRef<SavingsFormSheetRef>((_props, ref) =>
           onClose={() => setShowDatePicker(false)}
         />
 
-        <Button label={editing ? 'Güncelle' : 'Kaydet'} onPress={onSave} loading={busy} />
+        <Button label={editing ? t('common.update') : t('common.save')} onPress={onSave} loading={busy} />
         {editing ? (
-          <Button label="Sil" variant="danger" leftIcon={Trash2} onPress={onDelete} disabled={busy} />
+          <Button label={t("common.delete")} variant="danger" leftIcon={Trash2} onPress={onDelete} disabled={busy} />
         ) : null}
       </BottomSheetScrollView>
     </BottomSheetModal>

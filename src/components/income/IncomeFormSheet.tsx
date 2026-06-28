@@ -11,7 +11,7 @@ import { Icon } from '@/components/ui/Icon';
 import { CurrencyInput } from '@/components/ui/CurrencyInput';
 import { cn } from '@/lib/cn';
 import { colors } from '@/theme/tokens';
-import { formatDate } from '@/lib/formatters';
+import { useTranslation, useFormat } from '@/i18n';
 import { useAppDispatch } from '@/store/hooks';
 import { addToast } from '@/store/slices/uiSlice';
 import { getErrorMessage } from '@/lib/apiError';
@@ -47,6 +47,8 @@ type PickerTarget = 'date' | 'start' | 'end' | null;
 export const IncomeFormSheet = forwardRef<IncomeFormSheetRef>((_props, ref) => {
   const sheetRef = useRef<BottomSheetModal>(null);
   const dispatch = useAppDispatch();
+  const { t } = useTranslation();
+  const fmt = useFormat();
   const [createIncome, { isLoading: c1 }] = useCreateIncomeMutation();
   const [updateIncome, { isLoading: u1 }] = useUpdateIncomeMutation();
   const [deleteIncome, { isLoading: d1 }] = useDeleteIncomeMutation();
@@ -104,8 +106,8 @@ export const IncomeFormSheet = forwardRef<IncomeFormSheetRef>((_props, ref) => {
   const isEditing = !!editIncome || !!editTpl;
 
   const onSave = async () => {
-    if (!title.trim()) return dispatch(addToast('Başlık gerekli', 'warning'));
-    if (amount <= 0) return dispatch(addToast('Tutar gir', 'warning'));
+    if (!title.trim()) return dispatch(addToast(t('income.form.titleRequired'), 'warning'));
+    if (amount <= 0) return dispatch(addToast(t('income.form.amountRequired'), 'warning'));
 
     try {
       if (repeat) {
@@ -119,10 +121,10 @@ export const IncomeFormSheet = forwardRef<IncomeFormSheetRef>((_props, ref) => {
         };
         if (editTpl) {
           await updateTpl({ id: editTpl.id, body: { ...payload, active } }).unwrap();
-          dispatch(addToast('Düzenli gelir güncellendi'));
+          dispatch(addToast(t('income.form.recurringUpdated')));
         } else {
           await createTpl(payload).unwrap();
-          dispatch(addToast('Düzenli gelir eklendi'));
+          dispatch(addToast(t('income.form.recurringAdded')));
         }
       } else {
         const payload: CreateIncomePayload = {
@@ -133,33 +135,33 @@ export const IncomeFormSheet = forwardRef<IncomeFormSheetRef>((_props, ref) => {
         };
         if (editIncome) {
           await updateIncome({ id: editIncome.id, body: payload }).unwrap();
-          dispatch(addToast('Gelir güncellendi'));
+          dispatch(addToast(t('income.form.updated')));
         } else {
           await createIncome(payload).unwrap();
-          dispatch(addToast('Gelir eklendi'));
+          dispatch(addToast(t('income.form.added')));
         }
       }
       close();
     } catch (err) {
-      dispatch(addToast(getErrorMessage(err, 'Kaydedilemedi'), 'error'));
+      dispatch(addToast(getErrorMessage(err, t('common.saveFailed')), 'error'));
     }
   };
 
   const onDelete = () => {
     const label = editIncome?.title ?? editTpl?.title ?? '';
-    Alert.alert('Sil', `"${label}" silinsin mi?`, [
-      { text: 'Vazgeç', style: 'cancel' },
+    Alert.alert(t('common.delete'), t('common.deleteConfirm', { title: label }), [
+      { text: t('common.cancel'), style: 'cancel' },
       {
-        text: 'Sil',
+        text: t('common.delete'),
         style: 'destructive',
         onPress: async () => {
           try {
             if (editTpl) await deleteTpl(editTpl.id).unwrap();
             else if (editIncome) await deleteIncome(editIncome.id).unwrap();
-            dispatch(addToast('Silindi'));
+            dispatch(addToast(t('common.deleted')));
             close();
           } catch (err) {
-            dispatch(addToast(getErrorMessage(err, 'Silinemedi'), 'error'));
+            dispatch(addToast(getErrorMessage(err, t('common.deleteFailed')), 'error'));
           }
         },
       },
@@ -174,7 +176,7 @@ export const IncomeFormSheet = forwardRef<IncomeFormSheetRef>((_props, ref) => {
   );
 
   const busy = c1 || u1 || d1 || c2 || u2 || d2;
-  const heading = isEditing ? (repeat ? 'Düzenli geliri düzenle' : 'Geliri düzenle') : 'Yeni gelir';
+  const heading = isEditing ? (repeat ? t('income.form.createRecurring') : t('income.form.editOne')) : t('income.form.create');
 
   return (
     <BottomSheetModal
@@ -191,16 +193,16 @@ export const IncomeFormSheet = forwardRef<IncomeFormSheetRef>((_props, ref) => {
       <BottomSheetScrollView contentContainerClassName="gap-4 px-4 pb-10" keyboardShouldPersistTaps="handled">
         <View className="flex-row items-center justify-between">
           <Text variant="h2">{heading}</Text>
-          <Pressable onPress={close} hitSlop={8} accessibilityRole="button" accessibilityLabel="Kapat" className="p-1 active:opacity-60">
+          <Pressable onPress={close} hitSlop={8} accessibilityRole="button" accessibilityLabel={t("a11y.close")} className="p-1 active:opacity-60">
             <Icon icon={X} size={22} color={colors.muted} />
           </Pressable>
         </View>
 
-        <Field label="Başlık">
-          <Input bottomSheet value={title} onChangeText={setTitle} maxLength={LIMITS.title} placeholder={repeat ? 'Örn. Maaş' : 'Örn. Ek iş ödemesi'} />
+        <Field label={t("income.form.title")}>
+          <Input bottomSheet value={title} onChangeText={setTitle} maxLength={LIMITS.title} placeholder={repeat ? t('income.form.titlePlaceholderRecurring') : t('income.form.titlePlaceholderOne')} />
         </Field>
 
-        <Field label="Tutar">
+        <Field label={t("income.form.amount")}>
           <CurrencyInput value={amount} onChangeValue={setAmount} />
         </Field>
 
@@ -208,8 +210,8 @@ export const IncomeFormSheet = forwardRef<IncomeFormSheetRef>((_props, ref) => {
         {!isEditing ? (
           <View className="flex-row items-center justify-between rounded-xl bg-surface px-3 py-2.5">
             <View className="flex-1 pr-3">
-              <Text variant="label">Tekrarla</Text>
-              <Text variant="muted">Her ay otomatik gelir olarak eklenir</Text>
+              <Text variant="label">{t("income.form.repeat")}</Text>
+              <Text variant="muted">{t("income.form.repeatDesc")}</Text>
             </View>
             <Switch value={repeat} onValueChange={setRepeat} />
           </View>
@@ -217,7 +219,7 @@ export const IncomeFormSheet = forwardRef<IncomeFormSheetRef>((_props, ref) => {
 
         {repeat ? (
           <>
-            <Field label="Ayın günü">
+            <Field label={t("income.form.dayOfMonth")}>
               <View className="flex-row flex-wrap gap-2">
                 {DAYS.map((d) => {
                   const sel = dayOfMonth === d;
@@ -237,23 +239,23 @@ export const IncomeFormSheet = forwardRef<IncomeFormSheetRef>((_props, ref) => {
               </View>
             </Field>
 
-            <Field label="Başlangıç">
+            <Field label={t("income.form.start")}>
               <Pressable
                 onPress={() => setPicker('start')}
                 className="rounded-xl border border-border bg-white px-3 py-3 active:opacity-70"
               >
-                <Text variant="body" className="capitalize">{formatDate(toISODate(startDate))}</Text>
+                <Text variant="body" className="capitalize">{fmt.date(toISODate(startDate))}</Text>
               </Pressable>
             </Field>
 
-            <Field label="Bitiş (opsiyonel)">
+            <Field label={t("income.form.end")}>
               <View className="flex-row items-center gap-2">
                 <Pressable
                   onPress={() => setPicker('end')}
                   className="flex-1 rounded-xl border border-border bg-white px-3 py-3 active:opacity-70"
                 >
                   <Text variant={endDate ? 'body' : 'muted'} className="capitalize">
-                    {endDate ? formatDate(toISODate(endDate)) : 'Bitiş yok'}
+                    {endDate ? fmt.date(toISODate(endDate)) : t('income.form.noEnd')}
                   </Text>
                 </Pressable>
                 {endDate ? (
@@ -265,12 +267,12 @@ export const IncomeFormSheet = forwardRef<IncomeFormSheetRef>((_props, ref) => {
             </Field>
           </>
         ) : (
-          <Field label="Tarih">
+          <Field label={t("income.form.date")}>
             <Pressable
               onPress={() => setPicker('date')}
               className="rounded-xl border border-border bg-white px-3 py-3 active:opacity-70"
             >
-              <Text variant="body" className="capitalize">{formatDate(toISODate(date))}</Text>
+              <Text variant="body" className="capitalize">{fmt.date(toISODate(date))}</Text>
             </Pressable>
           </Field>
         )}
@@ -284,20 +286,20 @@ export const IncomeFormSheet = forwardRef<IncomeFormSheetRef>((_props, ref) => {
           onClose={() => setPicker(null)}
         />
 
-        <Field label="Not (opsiyonel)">
-          <Input bottomSheet value={note} onChangeText={setNote} maxLength={LIMITS.note} placeholder="Açıklama" />
+        <Field label={t("income.form.note")}>
+          <Input bottomSheet value={note} onChangeText={setNote} maxLength={LIMITS.note} placeholder={t("income.form.notePlaceholder")} />
         </Field>
 
         {editTpl ? (
           <View className="flex-row items-center justify-between rounded-xl bg-surface px-3 py-2.5">
-            <Text variant="label">Aktif</Text>
+            <Text variant="label">{t("income.form.active")}</Text>
             <Switch value={active} onValueChange={setActive} />
           </View>
         ) : null}
 
-        <Button label={isEditing ? 'Güncelle' : 'Kaydet'} onPress={onSave} loading={busy} />
+        <Button label={isEditing ? t('common.update') : t('common.save')} onPress={onSave} loading={busy} />
         {isEditing ? (
-          <Button label="Sil" variant="danger" leftIcon={Trash2} onPress={onDelete} disabled={busy} />
+          <Button label={t("common.delete")} variant="danger" leftIcon={Trash2} onPress={onDelete} disabled={busy} />
         ) : null}
       </BottomSheetScrollView>
     </BottomSheetModal>

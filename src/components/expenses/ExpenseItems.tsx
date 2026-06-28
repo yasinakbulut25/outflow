@@ -1,10 +1,11 @@
 import { View } from 'react-native';
 import { Text } from '@/components/ui/Text';
-import { formatExpense } from '@/lib/formatters';
+import { useFormat } from '@/i18n';
 import type { ExpenseItem } from '@/types';
 
 // Harcama kalemleri (birden fazla kalem varsa gösterilir).
 export function ExpenseItems({ items }: { items: ExpenseItem[] }) {
+  const fmt = useFormat();
   if (!items || items.length < 2) return null;
   return (
     <View className="mt-2 gap-1 border-t border-border pt-2">
@@ -14,7 +15,7 @@ export function ExpenseItems({ items }: { items: ExpenseItem[] }) {
             {item.name}
           </Text>
           <Text variant="mono" className="text-sm text-muted">
-            {formatExpense(item.amount)} ₺
+            {fmt.moneySigned(item.amount)}
           </Text>
         </View>
       ))}

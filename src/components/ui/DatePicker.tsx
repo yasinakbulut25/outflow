@@ -3,6 +3,7 @@ import { Modal, View, Pressable, Platform } from 'react-native';
 import DateTimePicker, { type DateTimePickerEvent } from '@react-native-community/datetimepicker';
 import { Text } from '@/components/ui/Text';
 import { colors } from '@/theme/tokens';
+import { useTranslation } from '@/i18n';
 
 interface DatePickerProps {
   visible: boolean;
@@ -13,7 +14,8 @@ interface DatePickerProps {
 
 // iOS popup — yalnız görünürken mount olur, bu yüzden geçici tarih useState ilk
 // değeriyle kurulur (effect'le senkron gerekmez).
-function IosDatePicker({ value, onConfirm, onClose }: Omit<DatePickerProps, 'visible'>) {
+function IosDatePicker({ value, onConfirm, onClose }: Omit<DatePickerProps, "visible">) {
+  const { t } = useTranslation();
   const [temp, setTemp] = useState(value);
 
   return (
@@ -22,7 +24,7 @@ function IosDatePicker({ value, onConfirm, onClose }: Omit<DatePickerProps, 'vis
         <Pressable className="rounded-t-2xl bg-white px-4 pb-6 pt-2" onPress={() => {}}>
           <View className="mb-1 flex-row items-center justify-between">
             <Pressable onPress={onClose} hitSlop={8} className="p-2 active:opacity-60">
-              <Text style={{ color: colors.muted }}>İptal</Text>
+              <Text style={{ color: colors.muted }}>{t("common.cancel")}</Text>
             </Pressable>
             <Pressable
               onPress={() => {
@@ -32,7 +34,7 @@ function IosDatePicker({ value, onConfirm, onClose }: Omit<DatePickerProps, 'vis
               hitSlop={8}
               className="p-2 active:opacity-60"
             >
-              <Text className="font-semibold" style={{ color: colors.accent }}>Tamam</Text>
+              <Text className="font-semibold" style={{ color: colors.accent }}>{t("common.ok")}</Text>
             </Pressable>
           </View>
           <DateTimePicker

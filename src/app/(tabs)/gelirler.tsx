@@ -15,11 +15,11 @@ import { YearStepper } from "@/components/ui/YearStepper";
 import { usePeriod } from "@/hooks/usePeriod";
 import { usePullToRefresh } from "@/hooks/usePullToRefresh";
 import { useStableData } from "@/hooks/useStableData";
-import { formatCurrency } from "@/lib/formatters";
 import { haptics } from "@/lib/haptics";
 import { useGetIncomesQuery, useGetRecurringIncomesQuery } from "@/store/api";
 import { colors } from "@/theme/tokens";
 import type { Income } from "@/types";
+import { useTranslation, useFormat } from "@/i18n";
 import { Plus, TrendingUp } from "lucide-react-native";
 import { useMemo, useRef } from "react";
 import { Pressable, View } from "react-native";
@@ -27,6 +27,8 @@ import { Pressable, View } from "react-native";
 const TEAL = "#16a34a";
 
 export default function IncomeScreen() {
+  const { t } = useTranslation();
+  const fmt = useFormat();
   const sheet = useRef<IncomeFormSheetRef>(null);
   const { year, month } = usePeriod();
 
@@ -64,8 +66,8 @@ export default function IncomeScreen() {
     <View className="flex-1">
       <Screen scroll safeTop={false} refreshing={refreshing} onRefresh={onRefresh}>
         <ScreenHeader
-          title="Gelirler"
-          description="Tekrarlayan ve tek seferlik gelirlerini yönet."
+          title={t("income.headerTitle")}
+          description={t("income.headerDesc")}
           right={<YearStepper />}
         />
 
@@ -74,16 +76,16 @@ export default function IncomeScreen() {
           style={{ backgroundColor: TEAL }}
         >
           <Text className="text-sm font-medium text-white/80">
-            Toplam gelir
+            {t("income.total")}
           </Text>
           <Text
             className="mt-1 text-3xl font-bold text-white"
             style={{ fontVariant: ["tabular-nums"] }}
           >
-            {formatCurrency(total)} ₺
+            {fmt.money(total)}
           </Text>
           <Text className="mt-1 text-sm text-white/80">
-            {list.length} kayıt
+            {t("common.records", { count: list.length })}
           </Text>
         </View>
 
@@ -103,8 +105,8 @@ export default function IncomeScreen() {
             ))
           ) : (
             <EmptyState
-              message="Bu dönemde gelir yok"
-              description="Maaş gibi düzenli ya da tek seferlik gelirini ekleyebilirsin; dönem özetine yansır."
+              message={t("income.empty")}
+              description={t("income.emptyDesc")}
               icon={TrendingUp}
             />
           )}
@@ -117,7 +119,7 @@ export default function IncomeScreen() {
           sheet.current?.present();
         }}
         accessibilityRole="button"
-        accessibilityLabel="Yeni gelir ekle"
+        accessibilityLabel={t("a11y.addIncome")}
         className="absolute bottom-6 right-5 h-14 w-14 items-center justify-center rounded-full active:opacity-80"
         style={{
           backgroundColor: TEAL,

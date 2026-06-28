@@ -17,8 +17,10 @@ import { Plus, Repeat } from "lucide-react-native";
 import { useRef } from "react";
 import { Pressable, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { useTranslation } from "@/i18n";
 
 export default function RecurringScreen() {
+  const { t } = useTranslation();
   const sheetRef = useRef<RecurringFormSheetRef>(null);
   const { data, isLoading, isError, refetch } = useGetRecurringQuery();
   const { refreshing, onRefresh } = usePullToRefresh(refetch);
@@ -51,8 +53,8 @@ export default function RecurringScreen() {
           }}
           ListHeaderComponent={
             <ScreenHeader
-              title="Düzenli Ödemeler"
-              description="Her ay otomatik oluşturulan sabit giderlerin."
+              title={t("recurring.headerTitle")}
+              description={t("recurring.headerDesc")}
             />
           }
           ListEmptyComponent={
@@ -60,8 +62,8 @@ export default function RecurringScreen() {
               <ErrorState onRetry={refetch} />
             ) : (
               <EmptyState
-                message="Henüz düzenli ödeme yok"
-                description="Kira, abonelik gibi her ay tekrarlayan ödemelerini şablon olarak ekle; ilgili aylara otomatik işlenir."
+                message={t("recurring.empty")}
+                description={t("recurring.emptyDesc")}
                 icon={Repeat}
               />
             )
@@ -77,7 +79,7 @@ export default function RecurringScreen() {
           sheetRef.current?.present();
         }}
         accessibilityRole="button"
-        accessibilityLabel="Yeni düzenli ödeme ekle"
+        accessibilityLabel={t("a11y.addRecurring")}
         className="absolute bottom-6 right-5 h-14 w-14 items-center justify-center rounded-full active:opacity-80"
         style={{
           backgroundColor: "#8b5cf6",

@@ -13,15 +13,16 @@ import { useAppDispatch } from '@/store/hooks';
 import { addToast } from '@/store/slices/uiSlice';
 import { getErrorMessage } from '@/lib/apiError';
 import { LIMITS } from '@/lib/limits';
+import { useTranslation } from '@/i18n';
 
 const schema = z
   .object({
-    password: z.string().min(6, 'En az 6 karakter').max(LIMITS.password, 'Şifre çok uzun'),
-    confirm: z.string().min(1, 'Şifreyi tekrar gir'),
+    password: z.string().min(6, 'auth.passwordMin').max(LIMITS.password, 'auth.passwordTooLong'),
+    confirm: z.string().min(1, 'auth.reset.confirmRequired'),
   })
   .refine((v) => v.password === v.confirm, {
     path: ['confirm'],
-    message: 'Şifreler eşleşmiyor',
+    message: 'auth.passwordsMismatch',
   });
 type FormValues = z.infer<typeof schema>;
 
@@ -30,6 +31,8 @@ export default function ResetPasswordScreen() {
   const dispatch = useAppDispatch();
   const { resetToken } = useLocalSearchParams<{ resetToken: string }>();
   const [resetPassword, { isLoading }] = useResetPasswordMutation();
+  const { t } = useTranslation();
+  const fe = (m?: string) => (m ? t(m) : undefined);
 
   const { control, handleSubmit, formState: { errors } } = useForm<FormValues>({
     resolver: zodResolver(schema),
@@ -39,18 +42,18 @@ export default function ResetPasswordScreen() {
   const onSubmit = handleSubmit(async ({ password }) => {
     try {
       await resetPassword({ resetToken: resetToken ?? '', newPassword: password }).unwrap();
-      dispatch(addToast('Şifren güncellendi, giriş yapabilirsin', 'success'));
+      dispatch(addToast(t('auth.reset.success'), 'success'));
       router.replace('/(auth)/login');
     } catch (err) {
-      dispatch(addToast(getErrorMessage(err, 'Şifre güncellenemedi'), 'error'));
+      dispatch(addToast(getErrorMessage(err, t('auth.reset.failed')), 'error'));
     }
   });
 
   return (
     <Screen scroll className="gap-8">
       <View className="gap-1">
-        <Text variant="h1">Yeni şifre</Text>
-        <Text variant="muted">Hesabın için yeni bir şifre belirle.</Text>
+        <Text variant="h1">{t("auth.reset.title")}</Text>
+        <Text variant="muted">{t("auth.reset.subtitle")}</Text>
       </View>
 
       <View className="gap-4">
@@ -58,7 +61,7 @@ export default function ResetPasswordScreen() {
           control={control}
           name="password"
           render={({ field: { onChange, onBlur, value } }) => (
-            <Field label="Yeni şifre" error={errors.password?.message}>
+            <Field label={t("auth.reset.newLabel")} error={fe(errors.password?.message)}>
               <Input
                 value={value}
                 onChangeText={onChange}
@@ -77,7 +80,7 @@ export default function ResetPasswordScreen() {
           control={control}
           name="confirm"
           render={({ field: { onChange, onBlur, value } }) => (
-            <Field label="Yeni şifre (tekrar)" error={errors.confirm?.message}>
+            <Field label={t("auth.reset.confirmLabel")} error={fe(errors.confirm?.message)}>
               <Input
                 value={value}
                 onChangeText={onChange}
@@ -95,7 +98,7 @@ export default function ResetPasswordScreen() {
         />
       </View>
 
-      <Button label="Şifreyi güncelle" onPress={onSubmit} loading={isLoading} />
+      <Button label={t("auth.reset.submit")} onPress={onSubmit} loading={isLoading} />
     </Screen>
   );
 }

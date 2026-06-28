@@ -2,7 +2,7 @@ import { View } from 'react-native';
 import { ArrowUpRight, ArrowDownRight } from 'lucide-react-native';
 import { Text } from '@/components/ui/Text';
 import { Icon } from '@/components/ui/Icon';
-import { getMonthName, formatCurrency, formatExpense } from '@/lib/formatters';
+import { useTranslation, useFormat } from '@/i18n';
 import type { MonthlyNet } from '@/types';
 
 const TEAL = '#16a34a';
@@ -14,8 +14,10 @@ function monthNo(m: string): number {
 
 // Aylık net — pozitif yeşil, negatif kırmızı.
 export function NetList({ data }: { data: MonthlyNet[] }) {
+  const { t } = useTranslation();
+  const fmt = useFormat();
   const rows = data.filter((d) => d.income > 0 || d.expense > 0);
-  if (!rows.length) return <Text variant="muted" className="py-2">Veri yok.</Text>;
+  if (!rows.length) return <Text variant="muted" className="py-2">{t("common.noData")}</Text>;
 
   return (
     <View className="gap-2">
@@ -27,20 +29,20 @@ export function NetList({ data }: { data: MonthlyNet[] }) {
             key={d.month}
             className={cnRow(i === rows.length - 1)}
           >
-            <Text variant="body" className="w-20 capitalize">{getMonthName(monthNo(d.month))}</Text>
+            <Text variant="body" className="w-20 capitalize">{fmt.monthName(monthNo(d.month))}</Text>
             <View className="flex-1 flex-row items-center gap-3">
               <View className="flex-row items-center gap-0.5">
                 <Icon icon={ArrowUpRight} size={13} color={TEAL} />
-                <Text className="text-xs" style={{ color: TEAL }} numberOfLines={1}>{formatCurrency(d.income)}</Text>
+                <Text className="text-xs" style={{ color: TEAL }} numberOfLines={1}>{fmt.num(d.income)}</Text>
               </View>
               <View className="flex-row items-center gap-0.5">
                 <Icon icon={ArrowDownRight} size={13} color={RED} />
-                <Text className="text-xs" style={{ color: RED }} numberOfLines={1}>{formatExpense(d.expense)}</Text>
+                <Text className="text-xs" style={{ color: RED }} numberOfLines={1}>{fmt.numSigned(d.expense)}</Text>
               </View>
             </View>
             <View className="rounded-full px-2 py-1" style={{ backgroundColor: color + '14' }}>
               <Text variant="mono" className="text-xs font-semibold" style={{ color }} numberOfLines={1}>
-                {positive ? '' : '−'}{formatCurrency(Math.abs(d.net))} ₺
+                {positive ? '' : '−'}{fmt.money(Math.abs(d.net))}
               </Text>
             </View>
           </View>

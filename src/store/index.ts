@@ -14,20 +14,22 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { api } from '@/store/api';
 import authReducer from '@/store/slices/authSlice';
 import uiReducer from '@/store/slices/uiSlice';
+import settingsReducer from '@/store/slices/settingsSlice';
 
 const rootReducer = combineReducers({
   [api.reducerPath]: api.reducer,
   auth: authReducer,
   ui: uiReducer,
+  settings: settingsReducer,
 });
 
-// Yalnız RTK Query cache'i kalıcı (offline cache). auth = SecureStore,
-// ui = her açılışta taze (cari ay seçili) kalsın diye persist edilmez.
+// RTK Query cache'i (offline cache) + settings (dil/para birimi tercihi) kalıcı.
+// auth = SecureStore, ui = her açılışta taze (cari ay seçili) kalsın diye persist edilmez.
 const persistConfig = {
   key: 'outflow-root',
   version: 1,
   storage: AsyncStorage,
-  whitelist: [api.reducerPath],
+  whitelist: [api.reducerPath, 'settings'],
 };
 
 const persistedReducer = persistReducer(persistConfig, rootReducer);

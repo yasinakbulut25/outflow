@@ -10,8 +10,10 @@ import { Icon } from '@/components/ui/Icon';
 import { useGetRecurringQuery } from '@/store/api';
 import { haptics } from '@/lib/haptics';
 import { colors } from '@/theme/tokens';
+import { useTranslation } from '@/i18n';
 
 export default function ExpensesScreen() {
+  const { t } = useTranslation();
   const sheetRef = useRef<ExpenseFormSheetRef>(null);
   const savingsSheet = useRef<SavingsFormSheetRef>(null);
   const recurringSheet = useRef<RecurringFormSheetRef>(null);
@@ -35,7 +37,7 @@ export default function ExpensesScreen() {
           sheetRef.current?.present();
         }}
         accessibilityRole="button"
-        accessibilityLabel="Yeni harcama ekle"
+        accessibilityLabel={t("a11y.addExpense")}
         className="absolute bottom-6 right-5 h-14 w-14 items-center justify-center rounded-full active:opacity-80"
         style={{
           backgroundColor: "#3b82f6",

@@ -4,7 +4,7 @@ import { Text } from '@/components/ui/Text';
 import { Icon } from '@/components/ui/Icon';
 import { Badge } from '@/components/ui/Badge';
 import { categoryIcon } from '@/lib/categoryIcons';
-import { formatCurrency } from '@/lib/formatters';
+import { useTranslation, useFormat } from '@/i18n';
 import type { RecurringTemplate } from '@/types';
 
 export function RecurringCard({
@@ -14,6 +14,8 @@ export function RecurringCard({
   template: RecurringTemplate;
   onPress?: (t: RecurringTemplate) => void;
 }) {
+  const { t } = useTranslation();
+  const fmt = useFormat();
   const { Icon: CatIcon, color } = categoryIcon(template.category_id);
 
   return (
@@ -31,12 +33,12 @@ export function RecurringCard({
             <Text variant="body" className="font-medium" numberOfLines={1}>
               {template.title}
             </Text>
-            <Text variant="muted">Her ayın {template.day_of_month}. günü</Text>
+            <Text variant="muted">{t('recurring.everyMonthDay', { day: template.day_of_month })}</Text>
           </View>
 
           <View className="items-end gap-1">
-            <Text variant="mono">{formatCurrency(template.amount)} ₺</Text>
-            {!template.active ? <Badge label="Pasif" tone="neutral" /> : null}
+            <Text variant="mono">{fmt.money(template.amount)}</Text>
+            {!template.active ? <Badge label={t('recurring.inactive')} tone="neutral" /> : null}
           </View>
         </View>
       </Card>

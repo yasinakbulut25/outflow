@@ -23,9 +23,12 @@ import { Controller, useForm } from "react-hook-form";
 import { Alert, Pressable, ScrollView, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { z } from "zod";
+import { useTranslation } from "@/i18n";
+import { LANGUAGES, CURRENCIES, CURRENCY_SYMBOL } from "@/i18n/locale";
+import { setLanguage, setCurrency } from "@/store/slices/settingsSlice";
 
 const nameSchema = z.object({
-  name: z.string().trim().min(1, "Ad gerekli").max(LIMITS.name, "Ad çok uzun"),
+  name: z.string().trim().min(1, "auth.nameRequired").max(LIMITS.name, "auth.nameTooLong"),
 });
 type NameValues = z.infer<typeof nameSchema>;
 
@@ -33,23 +36,25 @@ const passwordSchema = z
   .object({
     currentPassword: z
       .string()
-      .min(1, "Mevcut şifre gerekli")
-      .max(LIMITS.password, "Şifre çok uzun"),
+      .min(1, "profile.currentPasswordRequired")
+      .max(LIMITS.password, "auth.passwordTooLong"),
     newPassword: z
       .string()
-      .min(6, "En az 6 karakter")
-      .max(LIMITS.password, "Şifre çok uzun"),
-    confirm: z.string().min(1, "Yeni şifreyi tekrar gir"),
+      .min(6, "auth.passwordMin")
+      .max(LIMITS.password, "auth.passwordTooLong"),
+    confirm: z.string().min(1, "profile.newPasswordConfirmRequired"),
   })
   .refine((v) => v.newPassword === v.confirm, {
     path: ["confirm"],
-    message: "Şifreler eşleşmiyor",
+    message: "auth.passwordsMismatch",
   });
 type PasswordValues = z.infer<typeof passwordSchema>;
 
 export default function ProfileScreen() {
   const router = useRouter();
   const dispatch = useAppDispatch();
+  const { t, language, currency } = useTranslation();
+  const fe = (m?: string) => (m ? t(m) : undefined);
   const user = useAppSelector((s) => s.auth.user);
   const [busy, setBusy] = useState(false);
 
@@ -58,7 +63,7 @@ export default function ProfileScreen() {
     useChangePasswordMutation();
   const [deleteAccount, { isLoading: deleting }] = useDeleteAccountMutation();
 
-  const name = user?.name?.trim() || "Hesabım";
+  const name = user?.name?.trim() || t("profile.defaultName");
   const email = user?.email?.trim() || "";
   // Google/Apple ile giren kullanıcıların uygulama içi şifresi yok → şifre
   // değiştirme bölümünü gizle. Alan yoksa (eski backend) şifresi var kabul edilir.
@@ -84,9 +89,9 @@ export default function ProfileScreen() {
       const updated = await updateProfile({ name: values.name }).unwrap();
       await dispatch(updateUser(updated)).unwrap();
       nameForm.reset({ name: updated.name ?? values.name });
-      dispatch(addToast("Adın güncellendi", "success"));
+      dispatch(addToast(t("profile.nameUpdated"), "success"));
     } catch (err) {
-      dispatch(addToast(getErrorMessage(err, "Ad güncellenemedi"), "error"));
+      dispatch(addToast(getErrorMessage(err, t("profile.nameUpdateFailed")), "error"));
     }
   });
 
@@ -97,19 +102,19 @@ export default function ProfileScreen() {
         newPassword: values.newPassword,
       }).unwrap();
       passwordForm.reset({ currentPassword: "", newPassword: "", confirm: "" });
-      dispatch(addToast("Şifren güncellendi", "success"));
+      dispatch(addToast(t("profile.passwordUpdated"), "success"));
     } catch (err) {
       dispatch(
-        addToast(getErrorMessage(err, "Şifre değiştirilemedi"), "error"),
+        addToast(getErrorMessage(err, t("profile.passwordChangeFailed")), "error"),
       );
     }
   });
 
   const onLogout = () => {
-    Alert.alert("Çıkış yap", "Oturumu kapatmak istediğine emin misin?", [
-      { text: "Vazgeç", style: "cancel" },
+    Alert.alert(t("profile.logout"), t("profile.logoutConfirm"), [
+      { text: t("common.cancel"), style: "cancel" },
       {
-        text: "Çıkış yap",
+        text: t("profile.logout"),
         style: "destructive",
         onPress: async () => {
           setBusy(true);
@@ -122,22 +127,22 @@ export default function ProfileScreen() {
 
   const onDeleteAccount = () => {
     Alert.alert(
-      "Hesabı sil",
-      "Hesabın ve tüm verilerin (harcamalar, gelirler, tekrarlayan kayıtlar) kalıcı olarak silinecek. Bu işlem geri alınamaz.",
+      t("profile.deleteAccount"),
+      t("profile.deleteAccountConfirm"),
       [
-        { text: "Vazgeç", style: "cancel" },
+        { text: t("common.cancel"), style: "cancel" },
         {
-          text: "Hesabı sil",
+          text: t("profile.deleteAccount"),
           style: "destructive",
           onPress: async () => {
             try {
               await deleteAccount().unwrap();
               await dispatch(signOut());
               router.replace("/(auth)/login");
-              dispatch(addToast("Hesabın silindi", "success"));
+              dispatch(addToast(t("profile.accountDeleted"), "success"));
             } catch (err) {
               dispatch(
-                addToast(getErrorMessage(err, "Hesap silinemedi"), "error"),
+                addToast(getErrorMessage(err, t("profile.accountDeleteFailed")), "error"),
               );
             }
           },
@@ -155,13 +160,13 @@ export default function ProfileScreen() {
         <Pressable
           onPress={() => router.back()}
           accessibilityRole="button"
-          accessibilityLabel="Geri"
+          accessibilityLabel={t("a11y.back")}
           hitSlop={8}
           className="h-9 w-9 items-center justify-center rounded-full active:opacity-60"
         >
           <Icon icon={ChevronLeft} size={24} color={colors.foreground} />
         </Pressable>
-        <Text variant="h1">Profil</Text>
+        <Text variant="h1">{t("profile.title")}</Text>
       </View>
 
       <ScrollView
@@ -186,12 +191,12 @@ export default function ProfileScreen() {
         </Card>
 
         <View className="gap-3">
-          <Text variant="label">Ad</Text>
+          <Text variant="label">{t("profile.nameLabel")}</Text>
           <Controller
             control={nameForm.control}
             name="name"
             render={({ field: { onChange, onBlur, value } }) => (
-              <Field error={nameForm.formState.errors.name?.message}>
+              <Field error={fe(nameForm.formState.errors.name?.message)}>
                 <Input
                   value={value}
                   onChangeText={onChange}
@@ -199,7 +204,7 @@ export default function ProfileScreen() {
                   invalid={!!nameForm.formState.errors.name}
                   autoComplete="name"
                   maxLength={LIMITS.name}
-                  placeholder="Adın"
+                  placeholder={t("profile.namePlaceholder")}
                   returnKeyType="done"
                   onSubmitEditing={onSaveName}
                 />
@@ -207,7 +212,7 @@ export default function ProfileScreen() {
             )}
           />
           <Button
-            label="Adı kaydet"
+            label={t("profile.saveName")}
             onPress={onSaveName}
             loading={savingName}
           />
@@ -215,26 +220,24 @@ export default function ProfileScreen() {
 
         {!canChangePassword ? (
           <View className="gap-3">
-            <Text variant="label">Şifre</Text>
+            <Text variant="label">{t("profile.passwordSection")}</Text>
             <Card className="flex-row items-start gap-3">
               <Icon icon={ShieldCheck} size={20} color={colors.muted} />
               <Text variant="muted" className="flex-1">
-                Hesabın Google veya Apple ile bağlı olduğundan uygulama içinde
-                ayrı bir şifren yok. Giriş yöntemini bağlı olduğun hesap üzerinden
-                yönetebilirsin.
+                {t("profile.oauthNotice")}
               </Text>
             </Card>
           </View>
         ) : (
         <View className="gap-3">
-          <Text variant="label">Şifre değiştir</Text>
+          <Text variant="label">{t("profile.changePassword")}</Text>
           <Controller
             control={passwordForm.control}
             name="currentPassword"
             render={({ field: { onChange, onBlur, value } }) => (
               <Field
-                label="Mevcut şifre"
-                error={passwordForm.formState.errors.currentPassword?.message}
+                label={t("profile.currentPassword")}
+                error={fe(passwordForm.formState.errors.currentPassword?.message)}
               >
                 <Input
                   value={value}
@@ -255,8 +258,8 @@ export default function ProfileScreen() {
             name="newPassword"
             render={({ field: { onChange, onBlur, value } }) => (
               <Field
-                label="Yeni şifre"
-                error={passwordForm.formState.errors.newPassword?.message}
+                label={t("profile.newPassword")}
+                error={fe(passwordForm.formState.errors.newPassword?.message)}
               >
                 <Input
                   value={value}
@@ -277,8 +280,8 @@ export default function ProfileScreen() {
             name="confirm"
             render={({ field: { onChange, onBlur, value } }) => (
               <Field
-                label="Yeni şifre (tekrar)"
-                error={passwordForm.formState.errors.confirm?.message}
+                label={t("profile.newPasswordConfirm")}
+                error={fe(passwordForm.formState.errors.confirm?.message)}
               >
                 <Input
                   value={value}
@@ -296,7 +299,7 @@ export default function ProfileScreen() {
             )}
           />
           <Button
-            label="Şifreyi değiştir"
+            label={t("profile.changePasswordBtn")}
             variant="secondary"
             onPress={onChangePassword}
             loading={savingPassword}
@@ -304,8 +307,48 @@ export default function ProfileScreen() {
         </View>
         )}
 
+        <View className="gap-3">
+          <Text variant="label">{t("profile.language")}</Text>
+          <View className="flex-row rounded-xl border border-border bg-surface p-1">
+            {LANGUAGES.map((lng) => {
+              const active = language === lng;
+              return (
+                <Pressable
+                  key={lng}
+                  onPress={() => dispatch(setLanguage(lng))}
+                  className={`flex-1 items-center rounded-xl py-2 active:opacity-70 ${active ? "bg-accent" : ""}`}
+                >
+                  <Text className={`font-medium ${active ? "text-white" : "text-muted"}`}>
+                    {lng === "tr" ? t("profile.languageNameTr") : t("profile.languageNameEn")}
+                  </Text>
+                </Pressable>
+              );
+            })}
+          </View>
+        </View>
+
+        <View className="gap-3">
+          <Text variant="label">{t("profile.currency")}</Text>
+          <View className="flex-row rounded-xl border border-border bg-surface p-1">
+            {CURRENCIES.map((cur) => {
+              const active = currency === cur;
+              return (
+                <Pressable
+                  key={cur}
+                  onPress={() => dispatch(setCurrency(cur))}
+                  className={`flex-1 items-center rounded-xl py-2 active:opacity-70 ${active ? "bg-accent" : ""}`}
+                >
+                  <Text className={`font-medium ${active ? "text-white" : "text-muted"}`}>
+                    {CURRENCY_SYMBOL[cur]} {cur}
+                  </Text>
+                </Pressable>
+              );
+            })}
+          </View>
+        </View>
+
         <Button
-          label="Çıkış yap"
+          label={t("profile.logout")}
           variant="danger"
           leftIcon={LogOut}
           onPress={onLogout}
@@ -314,14 +357,13 @@ export default function ProfileScreen() {
 
         <View className="mt-2 gap-3 border-t border-border pt-6">
           <Text variant="label" style={{ color: colors.danger }}>
-            Tehlikeli bölge
+            {t("profile.dangerZone")}
           </Text>
           <Text variant="muted">
-            Hesabını silersen tüm verilerin kalıcı olarak kaldırılır. Bu işlem
-            geri alınamaz.
+            {t("profile.dangerNote")}
           </Text>
           <Button
-            label="Hesabı sil"
+            label={t("profile.deleteAccount")}
             variant="danger"
             leftIcon={Trash2}
             onPress={onDeleteAccount}

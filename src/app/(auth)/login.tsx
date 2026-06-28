@@ -23,6 +23,7 @@ import { useEffect } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { Image, View } from "react-native";
 import { z } from "zod";
+import { useTranslation } from "@/i18n";
 
 WebBrowser.maybeCompleteAuthSession();
 
@@ -32,10 +33,10 @@ const schema = z.object({
   email: z
     .string()
     .trim()
-    .min(1, "E-posta gerekli")
-    .max(LIMITS.email, "E-posta çok uzun")
-    .email("Geçerli bir e-posta gir"),
-  password: z.string().min(1, "Şifre gerekli").max(LIMITS.password, "Şifre çok uzun"),
+    .min(1, "auth.emailRequired")
+    .max(LIMITS.email, "auth.emailTooLong")
+    .email("auth.emailInvalid"),
+  password: z.string().min(1, "auth.passwordRequired").max(LIMITS.password, "auth.passwordTooLong"),
 });
 type FormValues = z.infer<typeof schema>;
 
@@ -44,6 +45,8 @@ export default function LoginScreen() {
   const dispatch = useAppDispatch();
   const [login, { isLoading }] = useLoginMutation();
   const [googleAuth, { isLoading: googleLoading }] = useGoogleAuthMutation();
+  const { t } = useTranslation();
+  const fe = (m?: string) => (m ? t(m) : undefined);
 
   const {
     control,
@@ -69,7 +72,7 @@ export default function LoginScreen() {
         await finishSignIn(auth);
       } catch (err) {
         dispatch(
-          addToast(getErrorMessage(err, "Google ile giriş başarısız"), "error"),
+          addToast(getErrorMessage(err, t("auth.login.googleFailed")), "error"),
         );
       }
     })();
@@ -88,7 +91,7 @@ export default function LoginScreen() {
       const auth = await login(values).unwrap();
       await finishSignIn(auth);
     } catch (err) {
-      dispatch(addToast(getErrorMessage(err, "Giriş başarısız"), "error"));
+      dispatch(addToast(getErrorMessage(err, t("auth.login.failed")), "error"));
     }
   });
 
@@ -109,7 +112,7 @@ export default function LoginScreen() {
         />
         <View className="items-center gap-1">
           <Text variant="h1">Outflow</Text>
-          <Text variant="muted">Hesabına giriş yap</Text>
+          <Text variant="muted">{t("auth.login.subtitle")}</Text>
         </View>
       </View>
 
@@ -118,7 +121,7 @@ export default function LoginScreen() {
           control={control}
           name="email"
           render={({ field: { onChange, onBlur, value } }) => (
-            <Field label="E-posta" error={errors.email?.message}>
+            <Field label={t("auth.emailLabel")} error={fe(errors.email?.message)}>
               <Input
                 value={value}
                 onChangeText={onChange}
@@ -129,7 +132,7 @@ export default function LoginScreen() {
                 autoComplete="email"
                 keyboardType="email-address"
                 maxLength={LIMITS.email}
-                placeholder="ornek@email.com"
+                placeholder={t("auth.emailPlaceholder")}
                 returnKeyType="next"
               />
             </Field>
@@ -139,7 +142,7 @@ export default function LoginScreen() {
           control={control}
           name="password"
           render={({ field: { onChange, onBlur, value } }) => (
-            <Field label="Şifre" error={errors.password?.message}>
+            <Field label={t("auth.passwordLabel")} error={fe(errors.password?.message)}>
               <Input
                 value={value}
                 onChangeText={onChange}
@@ -157,24 +160,24 @@ export default function LoginScreen() {
         />
         <View className="flex-row justify-end">
           <Link href="/(auth)/forgot-password" className="text-sm font-medium text-accent">
-            Şifreni mi unuttun?
+            {t("auth.login.forgot")}
           </Link>
         </View>
       </View>
 
-      <Button label="Giriş yap" onPress={onSubmit} loading={isLoading} />
+      <Button label={t("auth.login.submit")} onPress={onSubmit} loading={isLoading} />
 
       <View className="flex-row items-center gap-3">
         <View className="flex-1 h-px bg-border" />
         <Text variant="muted" className="text-xs">
-          veya
+          {t("common.or")}
         </Text>
         <View className="flex-1 h-px bg-border" />
       </View>
 
       <View className="gap-3">
         <SocialButton
-          label="Google ile devam et"
+          label={t("auth.login.google")}
           logo={<GoogleLogo size={18} />}
           onPress={() => void googlePromptAsync()}
           loading={googleLoading}
@@ -184,9 +187,9 @@ export default function LoginScreen() {
       </View>
 
       <View className="flex-row justify-center gap-1">
-        <Text variant="muted">Hesabın yok mu?</Text>
+        <Text variant="muted">{t("auth.login.noAccount")}</Text>
         <Link href="/(auth)/signup" className="text-sm font-medium text-accent">
-          Kayıt ol
+          {t("auth.login.signup")}
         </Link>
       </View>
     </Screen>

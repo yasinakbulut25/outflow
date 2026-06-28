@@ -15,8 +15,8 @@ import { usePeriod } from "@/hooks/usePeriod";
 import { usePullToRefresh } from "@/hooks/usePullToRefresh";
 import { useStableData } from "@/hooks/useStableData";
 import { BIRIKIM_CATEGORY_ID } from "@/lib/categoryIcons";
-import { formatCurrency } from "@/lib/formatters";
 import { displayAmount } from "@/lib/groupExpenses";
+import { useTranslation, useFormat } from "@/i18n";
 import { haptics } from "@/lib/haptics";
 import { useGetExpensesQuery } from "@/store/api";
 import { colors } from "@/theme/tokens";
@@ -29,6 +29,8 @@ import { SafeAreaView } from "react-native-safe-area-context";
 const GOLD = "#d97706"; // birikim teması (altın)
 
 export default function SavingsScreen() {
+  const { t } = useTranslation();
+  const fmt = useFormat();
   const sheetRef = useRef<SavingsFormSheetRef>(null);
   const { year, month } = usePeriod();
   const {
@@ -58,22 +60,22 @@ export default function SavingsScreen() {
   const header = (
     <View>
       <ScreenHeader
-        title="Birikimler"
-        description="Altın, döviz, nakit; neyi ne kadar biriktirdiğini takip et."
+        title={t("savings.headerTitle")}
+        description={t("savings.headerDesc")}
         right={<YearStepper />}
       />
       <View className="mb-4 rounded-2xl p-4" style={{ backgroundColor: GOLD }}>
         <Text className="text-sm font-medium text-white/80">
-          Toplam birikim
+          {t("savings.total")}
         </Text>
         <Text
           className="mt-1 text-3xl font-bold text-white"
           style={{ fontVariant: ["tabular-nums"] }}
         >
-          {formatCurrency(total)} ₺
+          {fmt.money(total)}
         </Text>
         <Text className="mt-1 text-sm text-white/80">
-          {savings.length} kayıt
+          {t("common.records", { count: savings.length })}
         </Text>
       </View>
       <PeriodBar />
@@ -112,8 +114,8 @@ export default function SavingsScreen() {
               <ErrorState onRetry={refetch} />
             ) : (
               <EmptyState
-                message="Bu dönemde birikim yok"
-                description="Altın, dolar, nakit gibi biriktirdiklerini ekleyebilirsin."
+                message={t("savings.empty")}
+                description={t("savings.emptyDesc")}
                 icon={HandCoins}
               />
             )
@@ -129,7 +131,7 @@ export default function SavingsScreen() {
           sheetRef.current?.present();
         }}
         accessibilityRole="button"
-        accessibilityLabel="Yeni birikim ekle"
+        accessibilityLabel={t("a11y.addSaving")}
         className="absolute bottom-6 right-5 h-14 w-14 items-center justify-center rounded-full active:opacity-80"
         style={{
           backgroundColor: GOLD,

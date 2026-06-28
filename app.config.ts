@@ -25,9 +25,9 @@ const config: ExpoConfig = {
     infoPlist: {
       // Yalnızca standart HTTPS kullanılıyor → ihracat uyumluluğu sorusunu otomatik "Hayır" yapar.
       ITSAppUsesNonExemptEncryption: false,
-      // Uygulama Türkçe → App Store'un dili "EN" yerine "Türkçe" göstermesi için yerelleştirmeyi beyan et.
+      // Uygulama Türkçe + İngilizce → App Store'un desteklenen dilleri göstermesi için yerelleştirmeyi beyan et.
       CFBundleDevelopmentRegion: 'tr',
-      CFBundleLocalizations: ['tr'],
+      CFBundleLocalizations: ['tr', 'en'],
       ...(googleReversedScheme
         ? { CFBundleURLTypes: [{ CFBundleURLSchemes: [googleReversedScheme] }] }
         : {}),
@@ -62,6 +62,7 @@ const config: ExpoConfig = {
       },
     ],
     'expo-secure-store',
+    'expo-localization',
     '@react-native-community/datetimepicker',
   ],
   experiments: {

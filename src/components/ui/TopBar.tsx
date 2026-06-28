@@ -4,12 +4,14 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Text } from '@/components/ui/Text';
 import { useAppSelector } from '@/store/hooks';
 import { colors } from '@/theme/tokens';
+import { useTranslation } from '@/i18n';
 
 const LOGO = require('../../../assets/images/icon.png');
 
 /** Tüm sekmelerin üstünde sabit duran marka çubuğu: logo + uygulama adı + profil butonu.
  *  (tabs)/_layout'ta Tabs header'ı olarak verilir; üst güvenli alan boşluğunu kendi yönetir. */
 export function TopBar() {
+  const { t } = useTranslation();
   const insets = useSafeAreaInsets();
   const router = useRouter();
   const user = useAppSelector((s) => s.auth.user);
@@ -30,7 +32,7 @@ export function TopBar() {
           // '/profile' route'u; typedRoutes tipleri dev server'da yenilenene dek Href ile veriyoruz.
           onPress={() => router.push('/profile' as Href)}
           accessibilityRole="button"
-          accessibilityLabel="Profil"
+          accessibilityLabel={t("a11y.profile")}
           hitSlop={8}
           className="h-9 w-9 items-center justify-center rounded-full border border-border bg-surface active:opacity-70"
         >

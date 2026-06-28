@@ -8,11 +8,8 @@ import { Text } from "@/components/ui/Text";
 import { getErrorMessage } from "@/lib/apiError";
 import { categoryIcon } from "@/lib/categoryIcons";
 import { cn } from "@/lib/cn";
-import {
-  calculateInstallmentAmount,
-  formatCurrency,
-  formatDate,
-} from "@/lib/formatters";
+import { calculateInstallmentAmount } from "@/lib/formatters";
+import { useTranslation, useFormat, useCategoryName } from "@/i18n";
 import { LIMITS } from "@/lib/limits";
 import {
   useCreateExpenseMutation,
@@ -72,10 +69,12 @@ export const ExpenseFormSheet = forwardRef<
   ExpenseFormSheetRef,
   ExpenseFormSheetProps
 >((props, ref) => {
-  const {
-    forcedCategoryId,
-    labels = { create: "Yeni harcama", edit: "Harcamayı düzenle" },
-  } = props;
+  const { forcedCategoryId, labels } = props;
+  const { t } = useTranslation();
+  const fmt = useFormat();
+  const catName = useCategoryName();
+  const createLabel = labels?.create ?? t("expenses.form.create");
+  const editLabel = labels?.edit ?? t("expenses.form.edit");
   const sheetRef = useRef<BottomSheetModal>(null);
   const dispatch = useAppDispatch();
   const { data: categories } = useGetCategoriesQuery();
@@ -154,12 +153,12 @@ export const ExpenseFormSheet = forwardRef<
   const addItem = () => {
     if (items.length >= LIMITS.maxItems) {
       dispatch(
-        addToast(`En fazla ${LIMITS.maxItems} kalem ekleyebilirsin`, "warning"),
+        addToast(t("expenses.form.maxItems", { count: LIMITS.maxItems }), "warning"),
       );
       return;
     }
     if (!lastItemFilled) {
-      dispatch(addToast("Önce bu kalemin fiyatını gir", "warning"));
+      dispatch(addToast(t("expenses.form.fillPriceFirst"), "warning"));
       return;
     }
     const row = newRow();
@@ -174,14 +173,14 @@ export const ExpenseFormSheet = forwardRef<
 
   const onSave = async () => {
     const cleanItems = items
-      .map((it) => ({ name: it.name.trim() || "Kalem", amount: it.amount }))
+      .map((it) => ({ name: it.name.trim() || t("expenses.form.defaultItem"), amount: it.amount }))
       .filter((it) => it.amount > 0);
 
-    if (!title.trim()) return dispatch(addToast("Başlık gerekli", "warning"));
+    if (!title.trim()) return dispatch(addToast(t("expenses.form.titleRequired"), "warning"));
     if (!cleanItems.length)
-      return dispatch(addToast("En az bir tutar gir", "warning"));
+      return dispatch(addToast(t("expenses.form.amountRequired"), "warning"));
     if (paymentType === "installment" && installmentCount < 2)
-      return dispatch(addToast("Taksit sayısı en az 2 olmalı", "warning"));
+      return dispatch(addToast(t("expenses.form.installmentMin"), "warning"));
 
     const payload: CreateExpensePayload = {
       title: title.trim(),
@@ -196,31 +195,31 @@ export const ExpenseFormSheet = forwardRef<
     try {
       if (editing) {
         await updateExpense({ id: editing.id, body: payload }).unwrap();
-        dispatch(addToast("Harcama güncellendi"));
+        dispatch(addToast(t("expenses.form.updated")));
       } else {
         await createExpense(payload).unwrap();
-        dispatch(addToast("Harcama eklendi"));
+        dispatch(addToast(t("expenses.form.added")));
       }
       close();
     } catch (err) {
-      dispatch(addToast(getErrorMessage(err, "Kaydedilemedi"), "error"));
+      dispatch(addToast(getErrorMessage(err, t("common.saveFailed")), "error"));
     }
   };
 
   const onDelete = () => {
     if (!editing) return;
-    Alert.alert("Harcamayı sil", `"${editing.title}" silinsin mi?`, [
-      { text: "Vazgeç", style: "cancel" },
+    Alert.alert(t("expenses.form.deleteTitle"), t("common.deleteConfirm", { title: editing.title }), [
+      { text: t("common.cancel"), style: "cancel" },
       {
-        text: "Sil",
+        text: t("common.delete"),
         style: "destructive",
         onPress: async () => {
           try {
             await deleteExpense(editing.id).unwrap();
-            dispatch(addToast("Harcama silindi"));
+            dispatch(addToast(t("expenses.form.deleted")));
             close();
           } catch (err) {
-            dispatch(addToast(getErrorMessage(err, "Silinemedi"), "error"));
+            dispatch(addToast(getErrorMessage(err, t("common.deleteFailed")), "error"));
           }
         },
       },
@@ -257,35 +256,35 @@ export const ExpenseFormSheet = forwardRef<
         keyboardShouldPersistTaps="handled"
       >
         <View className="flex-row items-center justify-between">
-          <Text variant="h2">{editing ? labels.edit : labels.create}</Text>
+          <Text variant="h2">{editing ? editLabel : createLabel}</Text>
           <Pressable
             onPress={close}
             hitSlop={8}
             accessibilityRole="button"
-            accessibilityLabel="Kapat"
+            accessibilityLabel={t("a11y.close")}
             className="p-1 active:opacity-60"
           >
             <Icon icon={X} size={22} color={colors.muted} />
           </Pressable>
         </View>
 
-        <Field label="Başlık">
+        <Field label={t("expenses.form.title")}>
           <Input
             bottomSheet
             value={title}
             onChangeText={setTitle}
             maxLength={LIMITS.title}
-            placeholder="Örn. Market alışverişi"
+            placeholder={t("expenses.form.titlePlaceholder")}
           />
         </Field>
 
-        <Field label="Tarih">
+        <Field label={t("expenses.form.date")}>
           <Pressable
             onPress={() => setShowDatePicker(true)}
             className="rounded-xl border border-border bg-white px-3 py-3 active:opacity-70"
           >
             <Text variant="body" className="capitalize">
-              {formatDate(toISODate(date))}
+              {fmt.date(toISODate(date))}
             </Text>
           </Pressable>
         </Field>
@@ -297,7 +296,7 @@ export const ExpenseFormSheet = forwardRef<
         />
 
         {forcedCategoryId === undefined ? (
-          <Field label="Kategori">
+          <Field label={t("expenses.form.category")}>
             <View className="flex-row flex-wrap gap-2">
               {(categories ?? []).map((cat) => {
                 const { Icon: CatIcon, color } = categoryIcon(cat.id);
@@ -327,7 +326,7 @@ export const ExpenseFormSheet = forwardRef<
                         active ? "font-semibold text-white" : "text-foreground",
                       )}
                     >
-                      {cat.name}
+                      {catName(cat.id)}
                     </Text>
                   </Pressable>
                 );
@@ -336,7 +335,7 @@ export const ExpenseFormSheet = forwardRef<
           </Field>
         ) : null}
 
-        <Field label="Ödeme tipi">
+        <Field label={t("expenses.form.paymentType")}>
           <View className="flex-row rounded-xl border border-border bg-surface p-1">
             {(["cash", "installment"] as const).map((type) => (
               <Pressable
@@ -353,7 +352,7 @@ export const ExpenseFormSheet = forwardRef<
                     paymentType === type ? "text-white" : "text-muted",
                   )}
                 >
-                  {type === "cash" ? "Peşin" : "Taksit"}
+                  {type === "cash" ? t("expenses.cash") : t("expenses.installment")}
                 </Text>
               </Pressable>
             ))}
@@ -361,7 +360,7 @@ export const ExpenseFormSheet = forwardRef<
         </Field>
 
         {paymentType === "installment" ? (
-          <Field label="Taksit sayısı">
+          <Field label={t("expenses.form.installmentCount")}>
             <View className="flex-row items-center gap-3">
               <Pressable
                 onPress={() => setInstallmentCount((c) => Math.max(2, c - 1))}
@@ -385,7 +384,7 @@ export const ExpenseFormSheet = forwardRef<
         <View className="gap-2">
           <View className="flex-row items-center justify-between">
             <View>
-              <Text variant="label">Kalemler & Tutar</Text>
+              <Text variant="label">{t("expenses.form.items")}</Text>
             </View>
             <Pressable
               onPress={addItem}
@@ -396,7 +395,7 @@ export const ExpenseFormSheet = forwardRef<
               )}
             >
               <Icon icon={Plus} size={16} color={colors.accent} />
-              <Text className="text-sm font-medium text-accent">Ekle</Text>
+              <Text className="text-sm font-medium text-accent">{t("common.add")}</Text>
             </Pressable>
           </View>
           {items.map((it) => (
@@ -406,7 +405,7 @@ export const ExpenseFormSheet = forwardRef<
                 value={it.name}
                 onChangeText={(t) => updateItem(it.key, { name: t })}
                 maxLength={LIMITS.itemName}
-                placeholder="Kalem adı (opsiyonel)"
+                placeholder={t("expenses.form.itemPlaceholder")}
                 className="flex-1"
               />
               <CurrencyInput
@@ -429,27 +428,27 @@ export const ExpenseFormSheet = forwardRef<
 
         <View className="gap-1 rounded-xl bg-surface p-3">
           <View className="flex-row items-center justify-between">
-            <Text variant="label">Toplam</Text>
+            <Text variant="label">{t("expenses.form.total")}</Text>
             <Text variant="mono" className="text-lg">
-              {formatCurrency(total)} ₺
+              {fmt.money(total)}
             </Text>
           </View>
           {monthly !== null ? (
             <View className="flex-row items-center justify-between">
-              <Text variant="muted">Aylık taksit ({installmentCount}x)</Text>
-              <Text variant="muted">{formatCurrency(monthly)} ₺</Text>
+              <Text variant="muted">{t("expenses.form.monthlyInstallment", { count: installmentCount })}</Text>
+              <Text variant="muted">{fmt.money(monthly)}</Text>
             </View>
           ) : null}
         </View>
 
         <Button
-          label={editing ? "Güncelle" : "Kaydet"}
+          label={editing ? t("common.update") : t("common.save")}
           onPress={onSave}
           loading={busy}
         />
         {editing ? (
           <Button
-            label="Sil"
+            label={t("common.delete")}
             variant="danger"
             leftIcon={Trash2}
             onPress={onDelete}

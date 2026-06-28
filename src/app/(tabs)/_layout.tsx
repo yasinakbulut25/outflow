@@ -4,8 +4,10 @@ import { useAppSelector } from '@/store/hooks';
 import { TopBar } from '@/components/ui/TopBar';
 import { OnboardingModal } from '@/components/onboarding/OnboardingModal';
 import { colors } from '@/theme/tokens';
+import { useTranslation } from '@/i18n';
 
 export default function TabsLayout() {
+  const { t } = useTranslation();
   const user = useAppSelector((s) => s.auth.user);
   // Auth gate: oturum yoksa girişe yönlendir.
   if (!user) return <Redirect href="/(auth)/login" />;
@@ -33,7 +35,7 @@ export default function TabsLayout() {
       <Tabs.Screen
         name="index"
         options={{
-          title: 'Harcamalar',
+          title: t('tabs.expenses'),
           tabBarActiveTintColor: TAB_COLORS.expenses,
           tabBarIcon: ({ color, size }) => <Wallet color={color} size={size} />,
         }}
@@ -41,7 +43,7 @@ export default function TabsLayout() {
       <Tabs.Screen
         name="gelirler"
         options={{
-          title: 'Gelirler',
+          title: t('tabs.income'),
           tabBarActiveTintColor: TAB_COLORS.income,
           tabBarIcon: ({ color, size }) => <TrendingUp color={color} size={size} />,
         }}
@@ -49,7 +51,7 @@ export default function TabsLayout() {
       <Tabs.Screen
         name="birikimler"
         options={{
-          title: 'Birikimler',
+          title: t('tabs.savings'),
           tabBarActiveTintColor: TAB_COLORS.savings,
           tabBarIcon: ({ color, size }) => <HandCoins color={color} size={size} />,
         }}
@@ -57,7 +59,7 @@ export default function TabsLayout() {
       <Tabs.Screen
         name="analiz"
         options={{
-          title: 'Analiz',
+          title: t('tabs.analytics'),
           tabBarActiveTintColor: TAB_COLORS.analytics,
           tabBarIcon: ({ color, size }) => <BarChart3 color={color} size={size} />,
         }}
@@ -65,7 +67,7 @@ export default function TabsLayout() {
       <Tabs.Screen
         name="recurring"
         options={{
-          title: 'Düzenli',
+          title: t('tabs.recurring'),
           tabBarActiveTintColor: TAB_COLORS.recurring,
           tabBarIcon: ({ color, size }) => <Repeat color={color} size={size} />,
         }}

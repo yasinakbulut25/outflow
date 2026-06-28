@@ -6,11 +6,13 @@ import { Icon } from '@/components/ui/Icon';
 import { colors } from '@/theme/tokens';
 import { useAppDispatch, useAppSelector } from '@/store/hooks';
 import { dismissOnboarding } from '@/store/slices/authSlice';
+import { useTranslation } from '@/i18n';
 
 // Yeni kullanıcı kayıt olup uygulamaya ilk girdiğinde, kendisi için eklenen örnek
 // verileri tanıtan tek seferlik modal. Yalnızca buton ile kapanır (bilinçli kapatma):
 // arka plana dokunma ve Android geri tuşu modalı kapatmaz.
 export function OnboardingModal() {
+  const { t } = useTranslation();
   const dispatch = useAppDispatch();
   const visible = useAppSelector((s) => s.auth.showOnboarding);
 
@@ -28,16 +30,14 @@ export function OnboardingModal() {
           </View>
 
           <Text variant="h2" className="mb-2">
-            Hoş geldin! 👋
+            {t("onboarding.title")}
           </Text>
           <Text variant="muted" className="mb-6">
-            Uygulamayı daha kolay tanıman için senin adına birkaç örnek kayıt ekledik:
-            harcamalar, gelirler, birikimler ve düzenli ödemeler. Hepsini inceleyebilir,
-            düzenleyebilir veya silebilirsin.
+            {t("onboarding.body")}
           </Text>
 
           <Button
-            label="Harika, inceleyeyim"
+            label={t("onboarding.cta")}
             fullWidth
             onPress={() => dispatch(dismissOnboarding())}
           />

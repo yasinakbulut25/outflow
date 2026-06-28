@@ -1,16 +1,10 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useMemo, useRef } from 'react';
 import { View, Pressable, ScrollView, type LayoutChangeEvent } from 'react-native';
 import { Text } from '@/components/ui/Text';
 import { cn } from '@/lib/cn';
-import { getMonthName } from '@/lib/formatters';
 import { haptics } from '@/lib/haptics';
 import { usePeriod } from '@/hooks/usePeriod';
-
-// value: null = "Tümü", 1-12 = ay
-const CHIPS: { key: string; label: string; value: number | null }[] = [
-  { key: 'all', label: 'Tümü', value: null },
-  ...Array.from({ length: 12 }, (_, i) => ({ key: String(i + 1), label: getMonthName(i + 1), value: i + 1 })),
-];
+import { useTranslation, useFormat } from '@/i18n';
 
 /** Çipi yatay listede ortalayacak scroll x'i (saf — ref okumaz). */
 function centerX(x: number, width: number, containerWidth: number): number {
@@ -18,7 +12,18 @@ function centerX(x: number, width: number, containerWidth: number): number {
 }
 
 export function PeriodBar() {
+  const { t } = useTranslation();
+  const fmt = useFormat();
   const { month, setMonth } = usePeriod();
+
+  // value: null = t('period.all'), 1-12 = ay
+  const chips = useMemo(
+    () => [
+      { key: 'all', label: t('period.all'), value: null as number | null },
+      ...Array.from({ length: 12 }, (_, i) => ({ key: String(i + 1), label: fmt.monthName(i + 1), value: i + 1 as number | null })),
+    ],
+    [t, fmt],
+  );
 
   const scrollRef = useRef<ScrollView>(null);
   const layouts = useRef<Record<string, { x: number; width: number }>>({});
@@ -47,7 +52,7 @@ export function PeriodBar() {
           containerWidth.current = e.nativeEvent.layout.width;
         }}
       >
-        {CHIPS.map((chip) => {
+        {chips.map((chip) => {
           const active = month === chip.value;
           return (
             <Pressable

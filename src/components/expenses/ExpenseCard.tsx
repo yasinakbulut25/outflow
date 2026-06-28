@@ -5,12 +5,15 @@ import { Icon } from '@/components/ui/Icon';
 import { Badge } from '@/components/ui/Badge';
 import { categoryIcon } from '@/lib/categoryIcons';
 import { displayAmount } from '@/lib/groupExpenses';
-import { formatExpense } from '@/lib/formatters';
+import { useTranslation, useFormat, useCategoryName } from '@/i18n';
 import { ExpenseItems } from './ExpenseItems';
 import { InstallmentTimeline } from './InstallmentTimeline';
 import type { Expense } from '@/types';
 
 export function ExpenseCard({ expense, onPress }: { expense: Expense; onPress?: (e: Expense) => void }) {
+  const { t } = useTranslation();
+  const fmt = useFormat();
+  const catName = useCategoryName();
   const { Icon: CatIcon, color } = categoryIcon(expense.category_id);
   const isInstallment = expense.payment_type === 'installment';
   // Düzenli ödeme occurrence'ı (şablondan türetilmiş). Tek başına düzenlenmez;
@@ -36,18 +39,18 @@ export function ExpenseCard({ expense, onPress }: { expense: Expense; onPress?: 
             <Text variant="body" className="font-medium" numberOfLines={1}>
               {expense.title}
             </Text>
-            {expense.category_name ? (
-              <Text variant="muted">{expense.category_name}</Text>
+            {expense.category_id != null ? (
+              <Text variant="muted">{catName(expense.category_id)}</Text>
             ) : null}
           </View>
 
           <View className="items-end gap-1">
-            <Text variant="mono">{formatExpense(amount)} ₺</Text>
+            <Text variant="mono">{fmt.moneySigned(amount)}</Text>
             {isRecurring ? (
-              <Badge label="Düzenli" tone="neutral" />
+              <Badge label={t('expenses.recurring')} tone="neutral" />
             ) : (
               <Badge
-                label={isInstallment ? 'Taksit' : 'Peşin'}
+                label={isInstallment ? t('expenses.installment') : t('expenses.cash')}
                 tone={isInstallment ? 'installment' : 'cash'}
               />
             )}

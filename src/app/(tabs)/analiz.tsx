@@ -16,11 +16,11 @@ import { usePeriod } from "@/hooks/usePeriod";
 import { usePullToRefresh } from "@/hooks/usePullToRefresh";
 import { useStableData } from "@/hooks/useStableData";
 import { BIRIKIM_CATEGORY_ID, categoryIcon } from "@/lib/categoryIcons";
-import { getMonthName } from "@/lib/formatters";
 import { displayAmount } from "@/lib/groupExpenses";
 import { useGetAnalyticsQuery, useGetExpensesQuery } from "@/store/api";
 import { colors } from "@/theme/tokens";
-import type { CategoryTotal, Expense } from "@/types";
+import type { Expense } from "@/types";
+import { useTranslation, useFormat, useCategoryName } from "@/i18n";
 import { BarChart3, PieChart, Scale } from "lucide-react-native";
 import { useCallback, useMemo, type ReactNode } from "react";
 import { View } from "react-native";
@@ -51,22 +51,25 @@ function Section({
 }
 
 // Dönem harcamalarını kategoriye göre toplar (gider listesiyle aynı mantık:
-// taksitte aylık pay, birikim hariç). Renkler kategori id'sinden gelir.
-function categoryTotalsFromExpenses(expenses: Expense[]): CategoryTotal[] {
-  const map = new Map<number, { name: string; total: number }>();
+// taksitte aylık pay, birikim hariç). İsim render anında id'den (dile göre) çözülür.
+function categoryTotalsFromExpenses(
+  expenses: Expense[],
+): { id: number; color: string; total: number }[] {
+  const map = new Map<number, number>();
   for (const e of expenses) {
     if (e.category_id === BIRIKIM_CATEGORY_ID) continue; // birikim gider değil
     const id = e.category_id ?? 0;
-    const entry = map.get(id) ?? { name: e.category_name ?? "Diğer", total: 0 };
-    entry.total += displayAmount(e);
-    map.set(id, entry);
+    map.set(id, (map.get(id) ?? 0) + displayAmount(e));
   }
   return [...map.entries()]
-    .map(([id, v]) => ({ name: v.name, icon: "", color: categoryIcon(id).color, total: v.total }))
+    .map(([id, total]) => ({ id, color: categoryIcon(id).color, total }))
     .sort((a, b) => b.total - a.total);
 }
 
 export default function AnalyticsScreen() {
+  const { t } = useTranslation();
+  const fmt = useFormat();
+  const catName = useCategoryName();
   const { year, month } = usePeriod();
   const isMonthly = month !== null;
 
@@ -96,11 +99,11 @@ export default function AnalyticsScreen() {
       const s = data.year_summary;
       const activeMonths = data.monthly_net.filter((m) => m.income > 0 || m.expense > 0).length || 1;
       return {
-        label: `${year} yılı`,
+        label: t("analytics.yearLabel", { year }),
         income: s.total_income,
         expense: s.total_expense,
         net: s.net,
-        secondary: { label: "Aylık ortalama gider", value: s.total_expense / activeMonths },
+        secondary: { label: t("analytics.monthlyAvgExpense"), value: s.total_expense / activeMonths },
       };
     }
     const cur = data.monthly_net.find((m) => Number(m.month.slice(5, 7)) === month);
@@ -110,15 +113,24 @@ export default function AnalyticsScreen() {
     const expenseDelta =
       prev && prev.expense > 0 ? ((expense - prev.expense) / prev.expense) * 100 : null;
     return {
-      label: `${getMonthName(month)} ${year}`,
+      label: `${fmt.monthName(month)} ${year}`,
       income,
       expense,
       net: cur?.net ?? income - expense,
       expenseDelta,
     };
-  }, [data, isMonthly, month, year]);
+  }, [data, isMonthly, month, year, fmt, t]);
 
-  const categoryTotals = useMemo(() => categoryTotalsFromExpenses(expenses ?? []), [expenses]);
+  const categoryTotals = useMemo(
+    () =>
+      categoryTotalsFromExpenses(expenses ?? []).map((c) => ({
+        name: catName(c.id),
+        icon: "",
+        color: c.color,
+        total: c.total,
+      })),
+    [expenses, catName],
+  );
 
   const hasData =
     !!data &&
@@ -126,13 +138,15 @@ export default function AnalyticsScreen() {
       data.year_summary.total_expense > 0 ||
       data.category_totals.length > 0);
 
-  const periodLabel = isMonthly ? `${getMonthName(month)} ${year}` : `${year} geneli`;
+  const periodLabel = isMonthly
+    ? `${fmt.monthName(month)} ${year}`
+    : t("analytics.yearOverall", { year });
 
   return (
     <Screen scroll safeTop={false} refreshing={refreshing} onRefresh={onRefresh}>
       <ScreenHeader
-        title="Analiz"
-        description="Dönem seç; net durum, kategoriler ve trend buna göre güncellenir."
+        title={t("analytics.headerTitle")}
+        description={t("analytics.headerDesc")}
         right={<YearStepper />}
       />
       <PeriodBar />
@@ -147,30 +161,30 @@ export default function AnalyticsScreen() {
         <ErrorState onRetry={refetch} />
       ) : !hasData ? (
         <EmptyState
-          message="Bu yıl için analiz verisi yok"
-          description="Gelir ve gider ekledikçe net durum, kategori dağılımı ve aylık trend burada görünür."
+          message={t("analytics.empty")}
+          description={t("analytics.emptyDesc")}
         />
       ) : (
         <>
           {summary ? <AnalyticsHero {...summary} /> : null}
 
           <Section
-            title="Kategoriler"
-            subtitle={`Gider dağılımı · ${periodLabel}`}
+            title={t("analytics.categories")}
+            subtitle={t("analytics.categoriesSub", { period: periodLabel })}
             icon={PieChart}
           >
             <CategoryBreakdown data={categoryTotals} />
           </Section>
 
           <Section
-            title="Aylık Gelir / Gider"
-            subtitle="Yıl boyu trend"
+            title={t("analytics.monthlyIncomeExpense")}
+            subtitle={t("analytics.trendOverYear")}
             icon={BarChart3}
           >
             <MonthlyBars data={data!.monthly_net} />
           </Section>
 
-          <Section title="Aylık Net" subtitle="Yıl boyu" icon={Scale}>
+          <Section title={t("analytics.monthlyNet")} subtitle={t("analytics.overYear")} icon={Scale}>
             <NetList data={data!.monthly_net} />
           </Section>
         </>

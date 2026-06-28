@@ -14,6 +14,16 @@ import { useAppDispatch, useAppSelector } from '@/store/hooks';
 import { bootstrapAuth } from '@/store/slices/authSlice';
 import { ToastHost } from '@/components/ui/ToastHost';
 import { colors } from '@/theme/tokens';
+import { setLocale } from '@/i18n/locale';
+
+// Redux'taki dil/para birimi tercihini modül seviyesindeki aynaya yansıtır
+// (React dışı kodun erişebilmesi için). React tarafı zaten hook'larla güncellenir.
+function LocaleSync({ children }: { children: React.ReactNode }) {
+  const language = useAppSelector((s) => s.settings.language);
+  const currency = useAppSelector((s) => s.settings.currency);
+  setLocale(language, currency);
+  return <>{children}</>;
+}
 
 function RootNavigator() {
   const dispatch = useAppDispatch();
@@ -44,12 +54,14 @@ export default function RootLayout() {
     <GestureHandlerRootView style={{ flex: 1 }}>
       <Provider store={store}>
         <PersistGate loading={null} persistor={persistor}>
-          <SafeAreaProvider>
-            <BottomSheetModalProvider>
-              <StatusBar style="dark" />
-              <RootNavigator />
-            </BottomSheetModalProvider>
-          </SafeAreaProvider>
+          <LocaleSync>
+            <SafeAreaProvider>
+              <BottomSheetModalProvider>
+                <StatusBar style="dark" />
+                <RootNavigator />
+              </BottomSheetModalProvider>
+            </SafeAreaProvider>
+          </LocaleSync>
         </PersistGate>
       </Provider>
     </GestureHandlerRootView>

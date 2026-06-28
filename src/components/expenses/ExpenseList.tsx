@@ -14,6 +14,7 @@ import { Wallet } from "lucide-react-native";
 import { useCallback, useMemo } from "react";
 import { RefreshControl, View } from "react-native";
 import { MonthGroup } from "./MonthGroup";
+import { useTranslation } from "@/i18n";
 import { PeriodBar } from "./PeriodBar";
 
 export function ExpenseList({
@@ -25,6 +26,7 @@ export function ExpenseList({
   onPressSaving?: (e: Expense) => void;
   onPressRecurring?: (templateId: number) => void;
 }) {
+  const { t } = useTranslation();
   const { year, month } = usePeriod();
   // Tekrarlayan ödemeler artık backend'de şablondan türetiliyor (projected:true ile);
   // hem ay hem "Tümü" görünümünde API verisi doğrudan kullanılır.
@@ -66,8 +68,8 @@ export function ExpenseList({
   const listHeader = (
     <>
       <ScreenHeader
-        title="Harcamalar"
-        description="Aylık giderlerini, taksitleri ve düzenli ödemelerini takip et."
+        title={t("expenses.headerTitle")}
+        description={t("expenses.headerDesc")}
         right={<YearStepper />}
       />
       <PeriodBar />
@@ -101,8 +103,8 @@ export function ExpenseList({
           <ErrorState onRetry={refetch} />
         ) : (
           <EmptyState
-            message="Bu dönemde harcama yok"
-            description="Peşin ya da taksitli harcamalarını ekleyerek dönemsel takip etmeye başla."
+            message={t("expenses.empty")}
+            description={t("expenses.emptyDesc")}
             icon={Wallet}
           />
         )

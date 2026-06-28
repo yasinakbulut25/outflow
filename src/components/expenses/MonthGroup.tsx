@@ -11,7 +11,7 @@ import { Text } from '@/components/ui/Text';
 import { Icon } from '@/components/ui/Icon';
 import { cn } from '@/lib/cn';
 import { colors } from '@/theme/tokens';
-import { getMonthName, formatCurrency, formatExpense } from '@/lib/formatters';
+import { useTranslation, useFormat } from '@/i18n';
 import { DayGroup } from './DayGroup';
 import { ExpenseCard } from './ExpenseCard';
 import { SavingsCard } from '@/components/savings/SavingsCard';
@@ -31,6 +31,8 @@ interface Props {
 
 // Ay içindeki düzenli ödemeleri tek satıra toplayan katlanabilir bölüm.
 function RecurringSection({ group, onPressRecurring }: { group: MonthGroupModel; onPressRecurring?: (templateId: number) => void }) {
+  const { t } = useTranslation();
+  const fmt = useFormat();
   const [open, setOpen] = useState(false);
   const rotation = useSharedValue(0);
 
@@ -48,10 +50,10 @@ function RecurringSection({ group, onPressRecurring }: { group: MonthGroupModel;
           <Icon icon={Repeat} size={16} color={PURPLE} />
         </View>
         <View className="flex-1">
-          <Text variant="body" className="font-medium">Düzenli Ödemeler</Text>
-          <Text variant="muted">{group.recurring.length} ödeme</Text>
+          <Text variant="body" className="font-medium">{t('expenses.recurringPayments')}</Text>
+          <Text variant="muted">{t('expenses.paymentsCount', { count: group.recurring.length })}</Text>
         </View>
-        <Text variant="mono" style={{ color: PURPLE }}>{formatExpense(group.recurringAmount)} ₺</Text>
+        <Text variant="mono" style={{ color: PURPLE }}>{fmt.moneySigned(group.recurringAmount)}</Text>
         <Animated.View style={chevronStyle}>
           <Icon icon={ChevronDown} size={18} color={PURPLE} />
         </Animated.View>
@@ -74,6 +76,8 @@ function RecurringSection({ group, onPressRecurring }: { group: MonthGroupModel;
 
 // Ay içindeki birikimleri (kategori 13) ayrı emerald bölümde toplar.
 function SavingsSection({ group, onPressSaving }: { group: MonthGroupModel; onPressSaving?: (e: Expense) => void }) {
+  const { t } = useTranslation();
+  const fmt = useFormat();
   const [open, setOpen] = useState(false);
   const rotation = useSharedValue(0);
   const chevronStyle = useAnimatedStyle(() => ({ transform: [{ rotate: `${rotation.value}deg` }] }));
@@ -90,11 +94,11 @@ function SavingsSection({ group, onPressSaving }: { group: MonthGroupModel; onPr
           <Icon icon={HandCoins} size={16} color={EMERALD} />
         </View>
         <View className="flex-1">
-          <Text variant="body" className="font-medium">Birikimler</Text>
-          <Text variant="muted">{group.savings.length} birikim</Text>
+          <Text variant="body" className="font-medium">{t('savings.headerTitle')}</Text>
+          <Text variant="muted">{t('expenses.savingsCount', { count: group.savings.length })}</Text>
         </View>
         {group.savingsAmount > 0 ? (
-          <Text variant="mono" style={{ color: EMERALD }}>≈ {formatCurrency(group.savingsAmount)} ₺</Text>
+          <Text variant="mono" style={{ color: EMERALD }}>≈ {fmt.money(group.savingsAmount)}</Text>
         ) : null}
         <Animated.View style={chevronStyle}>
           <Icon icon={ChevronDown} size={18} color={EMERALD} />
@@ -113,6 +117,8 @@ function SavingsSection({ group, onPressSaving }: { group: MonthGroupModel; onPr
 }
 
 export function MonthGroup({ group, defaultExpanded = false, onPressExpense, onPressSaving, onPressRecurring }: Props) {
+  const { t } = useTranslation();
+  const fmt = useFormat();
   const [expanded, setExpanded] = useState(defaultExpanded);
   const rotation = useSharedValue(defaultExpanded ? 180 : 0);
 
@@ -129,23 +135,23 @@ export function MonthGroup({ group, defaultExpanded = false, onPressExpense, onP
     <View className="mb-3 overflow-hidden rounded-xl border border-border bg-white">
       <Pressable onPress={toggle} className="flex-row items-center gap-3 p-4 active:opacity-70">
         <View className="flex-1">
-          <Text variant="h2">{getMonthName(group.month)}</Text>
+          <Text variant="h2">{fmt.monthName(group.month)}</Text>
           <View className="mt-0.5 flex-row flex-wrap gap-x-3">
             {group.cashAmount > 0 ? (
-              <Text variant="muted">Peşin {formatExpense(group.cashAmount)} ₺</Text>
+              <Text variant="muted">{t('expenses.cash')} {fmt.moneySigned(group.cashAmount)}</Text>
             ) : null}
             {group.installmentAmount > 0 ? (
-              <Text variant="muted">Taksit {formatExpense(group.installmentAmount)} ₺</Text>
+              <Text variant="muted">{t('expenses.installment')} {fmt.moneySigned(group.installmentAmount)}</Text>
             ) : null}
             {group.recurringAmount > 0 ? (
-              <Text variant="muted" style={{ color: PURPLE }}>Düzenli {formatExpense(group.recurringAmount)} ₺</Text>
+              <Text variant="muted" style={{ color: PURPLE }}>{t('expenses.recurring')} {fmt.moneySigned(group.recurringAmount)}</Text>
             ) : null}
             {group.savingsAmount > 0 ? (
-              <Text variant="muted" style={{ color: EMERALD }}>Birikim ≈ {formatCurrency(group.savingsAmount)} ₺</Text>
+              <Text variant="muted" style={{ color: EMERALD }}>{t('expenses.savings')} ≈ {fmt.money(group.savingsAmount)}</Text>
             ) : null}
           </View>
         </View>
-        <Text variant="mono" className="text-lg">{formatExpense(group.totalAmount)} ₺</Text>
+        <Text variant="mono" className="text-lg">{fmt.moneySigned(group.totalAmount)}</Text>
         <Animated.View style={chevronStyle}>
           <Icon icon={ChevronDown} size={20} color={colors.muted} />
         </Animated.View>

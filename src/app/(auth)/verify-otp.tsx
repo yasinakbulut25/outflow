@@ -17,6 +17,7 @@ import { addToast } from '@/store/slices/uiSlice';
 import { getErrorMessage } from '@/lib/apiError';
 import { isMockSessionActive, MOCK_OTP } from '@/lib/mockBackend';
 import { colors } from '@/theme/tokens';
+import { useTranslation } from '@/i18n';
 
 const RESEND_COOLDOWN = 60; // saniye — backend cooldown'u ile uyumlu
 
@@ -24,7 +25,7 @@ const schema = z.object({
   code: z
     .string()
     .trim()
-    .regex(/^\d{6}$/, '6 haneli kodu gir'),
+    .regex(/^\d{6}$/, 'auth.otp.invalid'),
 });
 type FormValues = z.infer<typeof schema>;
 
@@ -35,6 +36,8 @@ export default function VerifyOtpScreen() {
   const [verifyOtp, { isLoading }] = useVerifyOtpMutation();
   const [forgotPassword, { isLoading: resending }] = useForgotPasswordMutation();
   const [cooldown, setCooldown] = useState(RESEND_COOLDOWN);
+  const { t } = useTranslation();
+  const fe = (m?: string) => (m ? t(m) : undefined);
 
   const { control, handleSubmit, formState: { errors } } = useForm<FormValues>({
     resolver: zodResolver(schema),
@@ -52,7 +55,7 @@ export default function VerifyOtpScreen() {
       const { resetToken } = await verifyOtp({ email: email ?? '', code }).unwrap();
       router.push({ pathname: '/(auth)/reset-password', params: { resetToken } });
     } catch (err) {
-      dispatch(addToast(getErrorMessage(err, 'Kod doğrulanamadı'), 'error'));
+      dispatch(addToast(getErrorMessage(err, t('auth.otp.verifyFailed')), 'error'));
     }
   });
 
@@ -61,9 +64,9 @@ export default function VerifyOtpScreen() {
     try {
       await forgotPassword({ email: email ?? '' }).unwrap();
       setCooldown(RESEND_COOLDOWN);
-      dispatch(addToast('Yeni kod gönderildi', 'success'));
+      dispatch(addToast(t('auth.otp.resent'), 'success'));
     } catch (err) {
-      dispatch(addToast(getErrorMessage(err, 'Kod gönderilemedi'), 'error'));
+      dispatch(addToast(getErrorMessage(err, t('auth.otp.sendFailed')), 'error'));
     }
   };
 
@@ -72,7 +75,7 @@ export default function VerifyOtpScreen() {
       <Pressable
         onPress={() => router.back()}
         accessibilityRole="button"
-        accessibilityLabel="Geri"
+        accessibilityLabel={t("a11y.back")}
         hitSlop={8}
         className="h-9 w-9 -ml-1 items-center justify-center rounded-full active:opacity-60"
       >
@@ -80,12 +83,12 @@ export default function VerifyOtpScreen() {
       </Pressable>
 
       <View className="gap-1">
-        <Text variant="h1">Kodu gir</Text>
+        <Text variant="h1">{t("auth.otp.title")}</Text>
         <Text variant="muted">
-          {email ? `${email} adresine` : 'E-postana'} gönderdiğimiz 6 haneli kodu gir.
+          {email ? t('auth.otp.descWithEmail', { email }) : t('auth.otp.descNoEmail')}
         </Text>
         {isMockSessionActive() ? (
-          <Text variant="muted" className="mt-1 text-accent">Demo modu — kod: {MOCK_OTP}</Text>
+          <Text variant="muted" className="mt-1 text-accent">{t("auth.otp.demo", { code: MOCK_OTP })}</Text>
         ) : null}
       </View>
 
@@ -93,7 +96,7 @@ export default function VerifyOtpScreen() {
         control={control}
         name="code"
         render={({ field: { onChange, onBlur, value } }) => (
-          <Field label="Doğrulama kodu" error={errors.code?.message}>
+          <Field label={t("auth.otp.label")} error={fe(errors.code?.message)}>
             <Input
               value={value}
               onChangeText={(t) => onChange(t.replace(/\D/g, ''))}
@@ -111,11 +114,11 @@ export default function VerifyOtpScreen() {
         )}
       />
 
-      <Button label="Doğrula" onPress={onSubmit} loading={isLoading} />
+      <Button label={t("auth.otp.submit")} onPress={onSubmit} loading={isLoading} />
 
       <Pressable onPress={onResend} disabled={cooldown > 0 || resending} hitSlop={8} className="items-center">
         <Text variant="muted" className={cooldown > 0 ? '' : 'text-accent'}>
-          {cooldown > 0 ? `Kodu tekrar gönder (${cooldown})` : 'Kodu tekrar gönder'}
+          {cooldown > 0 ? t('auth.otp.resendCountdown', { count: cooldown }) : t('auth.otp.resend')}
         </Text>
       </Pressable>
     </Screen>

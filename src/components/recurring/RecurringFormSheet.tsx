@@ -12,7 +12,7 @@ import { CurrencyInput } from '@/components/ui/CurrencyInput';
 import { cn } from '@/lib/cn';
 import { colors } from '@/theme/tokens';
 import { categoryIcon } from '@/lib/categoryIcons';
-import { formatDate } from '@/lib/formatters';
+import { useTranslation, useFormat, useCategoryName } from '@/i18n';
 import { useAppDispatch } from '@/store/hooks';
 import { addToast } from '@/store/slices/uiSlice';
 import { getErrorMessage } from '@/lib/apiError';
@@ -40,6 +40,9 @@ type PickerTarget = 'start' | 'end' | null;
 export const RecurringFormSheet = forwardRef<RecurringFormSheetRef>((_props, ref) => {
   const sheetRef = useRef<BottomSheetModal>(null);
   const dispatch = useAppDispatch();
+  const { t } = useTranslation();
+  const fmt = useFormat();
+  const catName = useCategoryName();
   const { data: categories } = useGetCategoriesQuery();
   const [createRecurring, { isLoading: creating }] = useCreateRecurringMutation();
   const [updateRecurring, { isLoading: updating }] = useUpdateRecurringMutation();
@@ -87,8 +90,8 @@ export const RecurringFormSheet = forwardRef<RecurringFormSheetRef>((_props, ref
   const close = () => sheetRef.current?.dismiss();
 
   const onSave = async () => {
-    if (!title.trim()) return dispatch(addToast('Başlık gerekli', 'warning'));
-    if (amount <= 0) return dispatch(addToast('Tutar gir', 'warning'));
+    if (!title.trim()) return dispatch(addToast(t('recurring.form.titleRequired'), 'warning'));
+    if (amount <= 0) return dispatch(addToast(t('recurring.form.amountRequired'), 'warning'));
 
     const payload: CreateRecurringPayload = {
       title: title.trim(),
@@ -102,31 +105,31 @@ export const RecurringFormSheet = forwardRef<RecurringFormSheetRef>((_props, ref
     try {
       if (editing) {
         await updateRecurring({ id: editing.id, body: { ...payload, active } }).unwrap();
-        dispatch(addToast('Şablon güncellendi'));
+        dispatch(addToast(t('recurring.form.updated')));
       } else {
         await createRecurring(payload).unwrap();
-        dispatch(addToast('Şablon eklendi'));
+        dispatch(addToast(t('recurring.form.added')));
       }
       close();
     } catch (err) {
-      dispatch(addToast(getErrorMessage(err, 'Kaydedilemedi'), 'error'));
+      dispatch(addToast(getErrorMessage(err, t('common.saveFailed')), 'error'));
     }
   };
 
   const onDelete = () => {
     if (!editing) return;
-    Alert.alert('Şablonu sil', `"${editing.title}" silinsin mi?`, [
-      { text: 'Vazgeç', style: 'cancel' },
+    Alert.alert(t('recurring.form.deleteTitle'), t('common.deleteConfirm', { title: editing.title }), [
+      { text: t('common.cancel'), style: 'cancel' },
       {
-        text: 'Sil',
+        text: t('common.delete'),
         style: 'destructive',
         onPress: async () => {
           try {
             await deleteRecurring(editing.id).unwrap();
-            dispatch(addToast('Şablon silindi'));
+            dispatch(addToast(t('recurring.form.deleted')));
             close();
           } catch (err) {
-            dispatch(addToast(getErrorMessage(err, 'Silinemedi'), 'error'));
+            dispatch(addToast(getErrorMessage(err, t('common.deleteFailed')), 'error'));
           }
         },
       },
@@ -156,21 +159,21 @@ export const RecurringFormSheet = forwardRef<RecurringFormSheetRef>((_props, ref
     >
       <BottomSheetScrollView contentContainerClassName="gap-4 px-4 pb-10" keyboardShouldPersistTaps="handled">
         <View className="flex-row items-center justify-between">
-          <Text variant="h2">{editing ? 'Şablonu düzenle' : 'Yeni düzenli ödeme'}</Text>
-          <Pressable onPress={close} hitSlop={8} accessibilityRole="button" accessibilityLabel="Kapat" className="p-1 active:opacity-60">
+          <Text variant="h2">{editing ? t('recurring.form.edit') : t('recurring.form.create')}</Text>
+          <Pressable onPress={close} hitSlop={8} accessibilityRole="button" accessibilityLabel={t("a11y.close")} className="p-1 active:opacity-60">
             <Icon icon={X} size={22} color={colors.muted} />
           </Pressable>
         </View>
 
-        <Field label="Başlık">
-          <Input bottomSheet value={title} onChangeText={setTitle} maxLength={LIMITS.title} placeholder="Örn. Netflix aboneliği" />
+        <Field label={t("recurring.form.title")}>
+          <Input bottomSheet value={title} onChangeText={setTitle} maxLength={LIMITS.title} placeholder={t("recurring.form.titlePlaceholder")} />
         </Field>
 
-        <Field label="Tutar">
+        <Field label={t("recurring.form.amount")}>
           <CurrencyInput value={amount} onChangeValue={setAmount} />
         </Field>
 
-        <Field label="Ayın günü">
+        <Field label={t("recurring.form.dayOfMonth")}>
           <View className="flex-row flex-wrap gap-2">
             {DAYS.map((d) => {
               const sel = dayOfMonth === d;
@@ -190,23 +193,23 @@ export const RecurringFormSheet = forwardRef<RecurringFormSheetRef>((_props, ref
           </View>
         </Field>
 
-        <Field label="Başlangıç">
+        <Field label={t("recurring.form.start")}>
           <Pressable
             onPress={() => setPicker('start')}
             className="rounded-xl border border-border bg-white px-3 py-3 active:opacity-70"
           >
-            <Text variant="body" className="capitalize">{formatDate(toISODate(startDate))}</Text>
+            <Text variant="body" className="capitalize">{fmt.date(toISODate(startDate))}</Text>
           </Pressable>
         </Field>
 
-        <Field label="Bitiş (opsiyonel)">
+        <Field label={t("recurring.form.end")}>
           <View className="flex-row items-center gap-2">
             <Pressable
               onPress={() => setPicker('end')}
               className="flex-1 rounded-xl border border-border bg-white px-3 py-3 active:opacity-70"
             >
               <Text variant={endDate ? 'body' : 'muted'} className="capitalize">
-                {endDate ? formatDate(toISODate(endDate)) : 'Bitiş yok'}
+                {endDate ? fmt.date(toISODate(endDate)) : t('recurring.form.noEnd')}
               </Text>
             </Pressable>
             {endDate ? (
@@ -224,7 +227,7 @@ export const RecurringFormSheet = forwardRef<RecurringFormSheetRef>((_props, ref
           onClose={() => setPicker(null)}
         />
 
-        <Field label="Kategori">
+        <Field label={t("recurring.form.category")}>
           <View className="flex-row flex-wrap gap-2">
             {(categories ?? []).map((cat) => {
               const { Icon: CatIcon, color } = categoryIcon(cat.id);
@@ -241,7 +244,7 @@ export const RecurringFormSheet = forwardRef<RecurringFormSheetRef>((_props, ref
                 >
                   <Icon icon={CatIcon} size={15} color={sel ? colors.white : color} />
                   <Text className={cn('text-sm', sel ? 'font-semibold text-white' : 'text-foreground')}>
-                    {cat.name}
+                    {catName(cat.id)}
                   </Text>
                 </Pressable>
               );
@@ -251,14 +254,14 @@ export const RecurringFormSheet = forwardRef<RecurringFormSheetRef>((_props, ref
 
         {editing ? (
           <View className="flex-row items-center justify-between rounded-xl bg-surface px-3 py-2.5">
-            <Text variant="label">Aktif</Text>
+            <Text variant="label">{t("recurring.form.active")}</Text>
             <Switch value={active} onValueChange={setActive} />
           </View>
         ) : null}
 
-        <Button label={editing ? 'Güncelle' : 'Kaydet'} onPress={onSave} loading={busy} />
+        <Button label={editing ? t('common.update') : t('common.save')} onPress={onSave} loading={busy} />
         {editing ? (
-          <Button label="Sil" variant="danger" leftIcon={Trash2} onPress={onDelete} disabled={busy} />
+          <Button label={t("common.delete")} variant="danger" leftIcon={Trash2} onPress={onDelete} disabled={busy} />
         ) : null}
       </BottomSheetScrollView>
     </BottomSheetModal>

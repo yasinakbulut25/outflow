@@ -2,7 +2,7 @@ import { View } from 'react-native';
 import { ArrowDown, ArrowUp, Minus, TrendingDown, TrendingUp } from 'lucide-react-native';
 import { Text } from '@/components/ui/Text';
 import { Icon, type IconComponent } from '@/components/ui/Icon';
-import { formatCurrency, formatExpense } from '@/lib/formatters';
+import { useTranslation, useFormat } from '@/i18n';
 import { colors } from '@/theme/tokens';
 
 const TEAL = '#16a34a';
@@ -33,6 +33,7 @@ function StatCard({
   icon: IconComponent;
   negative?: boolean;
 }) {
+  const fmt = useFormat();
   return (
     <View className="flex-1 rounded-2xl border border-border bg-white p-3">
       <View className="mb-2 h-8 w-8 items-center justify-center rounded-full" style={{ backgroundColor: color + '1a' }}>
@@ -40,25 +41,27 @@ function StatCard({
       </View>
       <Text variant="muted" className="text-xs">{label}</Text>
       <Text variant="mono" className="mt-0.5 text-lg font-bold" style={{ color }} numberOfLines={1}>
-        {negative ? formatExpense(value) : formatCurrency(value)} ₺
+        {negative ? fmt.moneySigned(value) : fmt.money(value)}
       </Text>
     </View>
   );
 }
 
 export function AnalyticsHero({ label, income, expense, net, expenseDelta, secondary }: PeriodSummary) {
+  const { t } = useTranslation();
+  const fmt = useFormat();
   const positive = net >= 0;
   const empty = income === 0 && expense === 0;
   const netColor = empty ? colors.muted : positive ? TEAL : RED;
   // Tasarruf oranı yalnız gelir varken ve pozitifken anlamlı (kalan / gelir).
   const savingsRate = income > 0 && net >= 0 ? (net / income) * 100 : null;
   const caption = empty
-    ? "Bu dönemde işlem yok"
+    ? t("analytics.noActivity")
     : net === 0
-      ? "Gelir ve gider eşit"
+      ? t("analytics.equal")
       : positive
-        ? "Gelir giderden fazla"
-        : "Gider gelirden fazla";
+        ? t("analytics.incomeMore")
+        : t("analytics.expenseMore");
 
   const deltaIcon = expenseDelta == null ? Minus : expenseDelta > 0 ? ArrowUp : expenseDelta < 0 ? ArrowDown : Minus;
 
@@ -67,14 +70,14 @@ export function AnalyticsHero({ label, income, expense, net, expenseDelta, secon
       <View className="overflow-hidden rounded-2xl p-4" style={{ backgroundColor: netColor }}>
         <View className="flex-row items-start justify-between">
           <View className="flex-1">
-            <Text className="text-sm font-medium text-white/80">Net Durum · {label}</Text>
+            <Text className="text-sm font-medium text-white/80">{t("analytics.net")} · {label}</Text>
             <Text
               className="mt-1 text-3xl font-bold text-white"
               style={{ fontVariant: ['tabular-nums'] }}
               numberOfLines={1}
               adjustsFontSizeToFit
             >
-              {positive ? '' : '−'}{formatCurrency(Math.abs(net))} ₺
+              {positive ? '' : '−'}{fmt.money(Math.abs(net))}
             </Text>
             <Text className="mt-1 text-xs text-white/80">{caption}</Text>
           </View>
@@ -85,7 +88,7 @@ export function AnalyticsHero({ label, income, expense, net, expenseDelta, secon
                 <Icon icon={deltaIcon} size={13} color="#ffffff" />
                 <Text className="text-xs font-semibold text-white">%{Math.abs(Math.round(expenseDelta))}</Text>
               </View>
-              <Text className="text-[10px] text-white/70">geçen aya göre gider</Text>
+              <Text className="text-[10px] text-white/70">{t("analytics.expenseVsLastMonth")}</Text>
             </View>
           ) : null}
         </View>
@@ -93,7 +96,7 @@ export function AnalyticsHero({ label, income, expense, net, expenseDelta, secon
         {savingsRate != null ? (
           <View className="mt-3 gap-1">
             <View className="flex-row items-center justify-between">
-              <Text className="text-xs text-white/80">Tasarruf oranı</Text>
+              <Text className="text-xs text-white/80">{t("analytics.savingsRate")}</Text>
               <Text className="text-xs font-semibold text-white">%{Math.round(savingsRate)}</Text>
             </View>
             <View className="h-1.5 overflow-hidden rounded-full bg-white/25">
@@ -104,14 +107,14 @@ export function AnalyticsHero({ label, income, expense, net, expenseDelta, secon
       </View>
 
       <View className="flex-row gap-2">
-        <StatCard label="Gelir" value={income} color={TEAL} icon={TrendingUp} />
-        <StatCard label="Gider" value={expense} color={RED} icon={TrendingDown} negative />
+        <StatCard label={t("analytics.income")} value={income} color={TEAL} icon={TrendingUp} />
+        <StatCard label={t("analytics.expense")} value={expense} color={RED} icon={TrendingDown} negative />
       </View>
 
       {secondary ? (
         <View className="flex-row items-center justify-between rounded-2xl border border-border bg-white px-4 py-3">
           <Text variant="muted" className="text-sm">{secondary.label}</Text>
-          <Text variant="mono" className="font-semibold text-foreground">{formatExpense(secondary.value)} ₺</Text>
+          <Text variant="mono" className="font-semibold text-foreground">{fmt.moneySigned(secondary.value)}</Text>
         </View>
       ) : null}
     </View>
