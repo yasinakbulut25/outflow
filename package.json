@@ -65,7 +65,9 @@
     "lint": "expo lint",
     "build:preview": "eas build -p android --profile preview",
     "build:prod": "eas build -p android --profile production",
-    "build:dev": "eas build -p android --profile development"
+    "build:dev": "eas build -p android --profile development",
+    "build:ios": "eas build -p ios --profile production",
+    "submit:ios": "eas submit -p ios --profile production"
   },
   "private": true
 }
